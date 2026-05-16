@@ -3,7 +3,7 @@ import type { EditRecipe } from './types'
 export const SPEED_STEPS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 4] as const;
 
 export const DEFAULT_RECIPE: EditRecipe = {
-  preset: "vertical-9-16",
+  preset: "landscape-16-9",
   customWidth: 1920,
   customHeight: 1080,
   framing: "fit",
@@ -17,4 +17,23 @@ export const DEFAULT_RECIPE: EditRecipe = {
   brightness: 0,
   contrast: 1,
   saturation: 1,
+  hueRotate: 0,
+  sepia: 0,
+  blur: 0,
+  grayscale: 0,
+  opacity: 1,
+  volume: 1,
+  invert: false,
+  flipH: false,
+  flipV: false,
+  vignette: 0,
+  noise: 0,
+  sharpen: 0,
+  colorBalanceR: 1,
+  colorBalanceG: 1,
+  colorBalanceB: 1,
+  text: "",
+  textColor: "#ffffff",
+  textFontSize: 48,
+  textPosition: "bottom",
 };

@@ -3,8 +3,10 @@
 import FocusTrap from "focus-trap-react";
 import { useEffect, useRef, useCallback } from "react";
 import { ExportStatus } from "@/lib/types";
+import { AlertTriangle, Zap } from "lucide-react";
 import LottiePlayer from "./LottiePlayer";
 import spinnerAnim from "@/lib/lottie/spinner.json";
+import { cn } from "@/lib/utils";
 
 interface Props {
   status: ExportStatus;
@@ -12,8 +14,8 @@ interface Props {
   onCancel?: () => void;
 }
 
-export default function ExportOverlay({ status, progress, onCancel }: Props) {
-  const visible = status === "loading-engine" || status === "exporting";
+export default function ExportOverlay({ status, progress, onCancel, error }: Props & { error?: string | null }) {
+  const visible = status === "loading-engine" || status === "exporting" || status === "error";
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const focusAnchorRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,15 +45,10 @@ export default function ExportOverlay({ status, progress, onCancel }: Props) {
     };
   }, [visible, handleKeyDown]);
 
-  useEffect(() => {
-    if (!visible && previousFocusRef.current) {
-      previousFocusRef.current.focus();
-    }
-  }, [visible]);
-
   if (!visible) return null;
 
   const isLoading = status === "loading-engine";
+  const isError = status === "error";
 
   return (
     <FocusTrap
@@ -66,77 +63,81 @@ export default function ExportOverlay({ status, progress, onCancel }: Props) {
       <div
         role="dialog"
         aria-modal="true"
-        tabIndex={-1}
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--bg)]/80 backdrop-blur-2xl transition-studio animate-in fade-in duration-500"
       >
         <div
-          className="text-center space-y-6 max-w-xs px-6 animate-fade-in"
+          className="text-center space-y-10 max-w-md w-full px-10 py-16 bg-[var(--surface)] border border-[var(--border)] rounded-[3rem] shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-10 duration-700 ease-studio"
           aria-live="polite"
         >
-          <div
-            ref={focusAnchorRef}
-            tabIndex={-1}
-            className="sr-only"
-            aria-hidden="true"
-          />
-          <div className="mx-auto w-20 h-20">
-            <LottiePlayer
-              animationData={spinnerAnim}
-              loop
-              autoplay
-              aria-hidden="true"
-            />
+          <div ref={focusAnchorRef} tabIndex={-1} className="sr-only" />
+          
+          <div className="mx-auto w-24 h-24 relative">
+            {isError ? (
+              <div className="w-full h-full bg-red-500/10 text-red-500 rounded-3xl flex items-center justify-center animate-bounce">
+                <AlertTriangle size={40} />
+              </div>
+            ) : (
+              <LottiePlayer
+                animationData={spinnerAnim}
+                loop
+                autoplay
+                className="w-full h-full"
+              />
+            )}
+            {!isError && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[10px] font-black font-mono text-[var(--accent)]">{progress}%</span>
+              </div>
+            )}
           </div>
-          <div>
-            <h2 className="font-heading font-bold text-xl tracking-tight text-[var(--text)]">
-              {isLoading ? "Loading engine" : "Exporting"}
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-black tracking-tight text-[var(--text)] uppercase">
+              {isError ? "System Failure" : isLoading ? "Initializing Engine" : "Rendering Studio"}
             </h2>
-            <p className="text-sm text-[var(--muted)] mt-1">
-              {isLoading
-                ? "Setting up the video engine. This only happens once."
-                : "Processing your video locally."}
-            </p>
-            <p className="text-xs font-heading font-semibold text-[var(--muted)] text-film-600 mt-2 uppercase tracking-wide">
-              Do not close or refresh this tab
+            <p className="text-xs text-[var(--muted)] font-medium leading-relaxed max-w-[280px] mx-auto">
+              {isError 
+                ? (error || "An unexpected error occurred during processing.")
+                : isLoading
+                ? "Calibrating the WebAssembly video engine for your device."
+                : "Encoding your masterpiece locally. High-performance compute active."}
             </p>
           </div>
-          <span className="sr-only">
-            {status === "loading-engine"
-              ? "Loading video engine..."
-              : `Exporting: ${progress}%`}
-          </span>
+
           {status === "exporting" && (
-            <div className="w-full space-y-2">
-              <div className="h-1 w-full bg-film-100 rounded-full overflow-hidden">
+            <div className="w-full space-y-4 pt-4">
+              <div className="h-2 w-full bg-[var(--border)] rounded-full overflow-hidden shadow-inner">
                 <div
-                  role="progressbar"
-                  aria-valuenow={progress}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label="Export progress"
-                  className="h-full bg-film-600 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-[var(--accent)] to-indigo-500 rounded-full transition-all duration-500 ease-studio shadow-[0_0_20px_rgba(37,99,235,0.4)]"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs font-heading font-semibold text-[var(--muted)]">
-                {progress}%
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--muted)]">
+                Optimizing Stream: {progress}%
               </p>
-              <div className="flex flex-col items-center gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => onCancel?.()}
-                  className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 active:scale-[0.98]"
-                >
-                  Cancel Export
-                </button>
-                <p className="text-gray-500 text-xs">
-                  Press Escape to cancel
-                </p>
-              </div>
             </div>
           )}
+
+          <div className="flex flex-col items-center gap-6 pt-6">
+            <button
+              type="button"
+              onClick={() => onCancel?.()}
+              className={cn(
+                "smart-button group flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-studio",
+                isError 
+                  ? "bg-red-500 text-white shadow-lg shadow-red-500/20" 
+                  : "bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] hover:bg-red-500 hover:text-white hover:border-red-500"
+              )}
+            >
+              <Zap size={14} className={cn("transition-studio group-hover:rotate-12", isError && "fill-current")} />
+              {isError ? "Dismiss Error" : "Abort Session"}
+            </button>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--muted)] opacity-50">
+              Press <kbd className="font-mono bg-[var(--surface-hover)] px-1.5 py-0.5 rounded border border-[var(--border)]">ESC</kbd> to exit
+            </p>
+          </div>
         </div>
       </div>
     </FocusTrap>
   );
-}
+}

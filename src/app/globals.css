@@ -2,88 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Landing.LOVE Formal Studio (Premium Palette) ── */
+/* ── Reframe Google-Grade Studio: Senior Engineer Edition ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  --bg: #FDFDFD;
+  /* Elite Minimalist Palette */
+  --bg: #FAFAFA;
   --surface: #FFFFFF;
-  --border: #E8EBF0;
-  --text: #0A0A0B;
-  --muted: #8E96A3;
-  --accent: #0066FF;
-  --accent-hover: #0052CC;
-  --glass: rgba(255, 255, 255, 0.7);
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
-  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.05);
-  --shadow-lg: 0 32px 64px -16px rgba(0,0,0,0.1);
+  --surface-hover: #F4F4F5;
+  --border: #E4E4E7;
+  --text: #09090B;
+  --muted: #71717A;
+  --accent: #000000; /* Formal Black Accent */
+  --accent-cta: #2563EB; /* Professional Blue for primary actions */
+  --ease-google: cubic-bezier(0.4, 0, 0.2, 1);
+  --canvas: #F4F4F5;
 }
 
-/* ── Landing.LOVE Formal Midnight ── */
 .dark {
-  --bg: #050505;
-  --surface: #101012;
-  --border: #1D1D21;
-  --text: #F5F5F7;
-  --muted: #6E6E73;
-  --accent: #0071E3;
-  --accent-hover: #0077ED;
-  --glass: rgba(10, 10, 11, 0.7);
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
-  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.4);
-  --shadow-lg: 0 40px 100px -20px rgba(0,0,0,0.6);
+  /* Obsidian Pro Palette */
+  --bg: #09090B;
+  --surface: #18181B;
+  --surface-hover: #27272A;
+  --border: #27272A;
+  --text: #FAFAFA;
+  --muted: #A1A1AA;
+  --accent: #FFFFFF;
+  --accent-cta: #3B82F6;
+  --canvas: #09090B;
 }
 
-/* ── Global Normalization ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
-  min-height: 100vh;
-  letter-spacing: -0.015em;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  transition: background-color 0.5s var(--ease-google), color 0.5s var(--ease-google);
 }
 
-/* Premium Transitions */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, transform, box-shadow, opacity, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  transition-duration: 600ms;
+@layer utilities {
+  .transition-google {
+    transition: all 0.4s var(--ease-google);
+  }
+
+  .glass-studio {
+    background-color: var(--surface);
+    opacity: 0.8;
+    backdrop-filter: blur(40px);
+    border-color: var(--border);
+    transition: all 0.4s var(--ease-google);
+  }
+
+  /* Refined Glass Fix for better compatibility */
+  .glass-studio {
+    @apply backdrop-blur-2xl border-[var(--border)];
+    background-color: color-mix(in srgb, var(--surface), transparent 20%);
+    transition: all 0.4s var(--ease-google);
+  }
+
+  .card-pro {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    transition: all 0.4s var(--ease-google);
+  }
+  .card-pro:hover {
+    border-color: color-mix(in srgb, var(--muted), transparent 70%);
+  }
+
+  .btn-primary {
+    @apply bg-[var(--accent-cta)] text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-google hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] font-bold py-3 px-6 rounded-2xl active:scale-95 transition-google hover:bg-[var(--surface-hover)];
+  }
+
+  .ambient-glow {
+    filter: blur(80px);
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
+/* ── Typography Hierarchy ── */
+h1, h2, h3, h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  @apply font-bold tracking-tight text-[var(--text)];
+}
+
+.label-mono {
+  @apply text-[9px] font-black uppercase tracking-[0.2em] text-[var(--muted)];
+}
+
+/* ── Refined Animations ── */
+:root {
+  --ease-google: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes entrance {
+  0% { opacity: 0; transform: translateY(12px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scale-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.transition-google {
+  transition: all 0.6s var(--ease-google);
+}
+
+.animate-entrance { animation: entrance 1s var(--ease-google) both; }
+.animate-scale { animation: scale-in 0.8s var(--ease-google) both; }
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ── Professional Custom Scrollbar ── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
-  height: 4px;
 }
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 20px;
+  @apply bg-[var(--border)] rounded-full;
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+/* ── Interactive Components ── */
+input[type="range"] {
+  @apply appearance-none bg-[var(--border)] h-[2px] rounded-full cursor-pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-3 h-3 rounded-full bg-[var(--accent-cta)] shadow-md transition-google hover:scale-125;
 }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+.sidebar-item {
+  @apply relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-google;
 }
-
-/* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+.sidebar-item-active {
+  background-color: color-mix(in srgb, var(--accent-cta), transparent 90%);
+  color: var(--accent-cta);
 }
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.sidebar-item-active::after {
+  content: '';
+  @apply absolute right-0 top-1/4 bottom-1/4 w-[3px] bg-[var(--accent-cta)] rounded-l-full;
 }

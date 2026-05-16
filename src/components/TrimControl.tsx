@@ -1,100 +1,114 @@
 "use client";
 
-import { EditRecipe } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Scissors, Timer, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
-  recipe: EditRecipe;
-  onChange: (patch: Partial<EditRecipe>) => void;
+  trimStart: number;
+  trimEnd: number | null;
+  onChange: (patch: Partial<{ trimStart: number; trimEnd: number | null }>) => void;
   duration: number;
 }
 
-export default function TrimControl({ recipe, onChange, duration }: Props) {
-  const [invalidStart, setStart]=useState(false);
-  const [invalidEnd, setEnd]=useState(false);
-
-  const handleStart = (val: string) => {
-    const n = parseFloat(val);
-    if (isNaN(n) || n < 0){
-      setStart(true);
-      return;
-    }
-    if (duration > 0 && n >= duration){
-      setStart(true);
-      return;
-    }
-    if (recipe.trimEnd !== null && n >= recipe.trimEnd){
-      setStart(true);
-      return;
-    };
-    setStart(false);
-    onChange({ trimStart: n });
-  };
-
-  const handleEnd = (val: string) => {
-    if (val === "") { setEnd(false);
-      onChange({ trimEnd: null }); return; }
-    const n = parseFloat(val);
-    if (isNaN(n) || n <= 0 || n <= recipe.trimStart){
-      setEnd(true);
-      return;
-    }
-    if (duration > 0 && n > duration){
-      setEnd(true);
-      return;
-    }
-    setEnd(false);
-    onChange({ trimEnd: n });
-  };
+export default function TrimControl({ trimStart, trimEnd, onChange, duration }: Props) {
+  const [startVal, setStartVal] = useState(trimStart.toString());
+  const [endVal, setEndVal] = useState(trimEnd?.toString() ?? "");
   
+  useEffect(() => {
+    setStartVal(trimStart.toString());
+    setEndVal(trimEnd?.toString() ?? "");
+  }, [trimStart, trimEnd]);
 
+  const handleStartChange = (v: string) => {
+    setStartVal(v);
+    const n = parseFloat(v);
+    if (!isNaN(n) && n >= 0 && n < (trimEnd ?? duration)) {
+      onChange({ trimStart: n });
+    }
+  };
 
-  const inputClass =
-    "w-full text-sm px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-film-400 text-[var(--text)] transition-shadow";
+  const handleEndChange = (v: string) => {
+    setEndVal(v);
+    if (v === "") {
+      onChange({ trimEnd: null });
+      return;
+    }
+    const n = parseFloat(v);
+    if (!isNaN(n) && n > trimStart && n <= duration) {
+      onChange({ trimEnd: n });
+    }
+  };
+
+  const isErrorStart = parseFloat(startVal) >= (trimEnd ?? duration) || parseFloat(startVal) < 0;
+  const isErrorEnd = endVal !== "" && (parseFloat(endVal) <= trimStart || parseFloat(endVal) > duration);
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <label htmlFor="trim-start" className="text-[10px] font-heading font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1.5">
-            Start (sec)
-          </label>
-          <input
-            id="trim-start"
-            type="number"
-            min={0}
-            max={duration > 0 ? duration : undefined}
-            step={0.1}
-            value={recipe.trimStart}
-            onChange={(e) => handleStart(e.target.value)}
-            className={`${inputClass} ${
-              invalidStart ? "border-red-500" : "border-[var(--border)]"}`}
-            placeholder="0"
-          />
+    <div className="flex flex-col gap-4 animate-entrance">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+            <Scissors size={14} />
+          </div>
+          <span className="label-mono">Precision Trimming</span>
         </div>
-        <div className="flex-1">
-          <label htmlFor="trim-end" className="text-[10px] font-heading font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1.5">
-            End (sec)
-          </label>
-          <input
-            id="trim-end"
-            type="number"
-            min={0}
-            max={duration > 0 ? duration : undefined}
-            step={0.1}
-            value={recipe.trimEnd ?? ""}
-            onChange={(e) => handleEnd(e.target.value)}
-            className={`${inputClass} ${
-              invalidEnd ? "border-red-500" : "border-[var(--border)]"}`}
-            placeholder={duration > 0 ? `${duration.toFixed(1)}` : "full length"}
-          />
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-[var(--surface-hover)] rounded-full border border-[var(--border)]">
+          <Timer size={12} className="text-[var(--muted)]" />
+          <span className="text-[10px] font-mono font-bold">{duration.toFixed(2)}s Total</span>
         </div>
       </div>
-      {duration > 0 && (
-        <p className="text-[10px] text-[var(--muted)] font-heading">
-          Duration: {duration.toFixed(1)}s
-        </p>
-      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        {/* Start Input */}
+        <div className={cn(
+          "relative group transition-google p-4 rounded-2xl border bg-[var(--surface)]",
+          isErrorStart ? "border-red-500/50 shadow-lg shadow-red-500/5" : "border-[var(--border)] hover:border-[var(--muted)]/30"
+        )}>
+          <label className="text-[9px] font-black uppercase tracking-widest text-[var(--muted)] mb-2 block">Mark In</label>
+          <div className="flex items-end gap-2">
+            <input
+              type="number"
+              value={startVal}
+              onChange={(e) => handleStartChange(e.target.value)}
+              step={0.1}
+              className="bg-transparent text-xl font-bold w-full outline-none tracking-tight"
+            />
+            <span className="text-[10px] font-mono font-bold text-[var(--muted)] mb-1">SEC</span>
+          </div>
+          {isErrorStart && <AlertCircle size={12} className="absolute top-4 right-4 text-red-500" />}
+        </div>
+
+        {/* End Input */}
+        <div className={cn(
+          "relative group transition-google p-4 rounded-2xl border bg-[var(--surface)]",
+          isErrorEnd ? "border-red-500/50 shadow-lg shadow-red-500/5" : "border-[var(--border)] hover:border-[var(--muted)]/30"
+        )}>
+          <label className="text-[9px] font-black uppercase tracking-widest text-[var(--muted)] mb-2 block">Mark Out</label>
+          <div className="flex items-end gap-2">
+            <input
+              type="number"
+              value={endVal}
+              placeholder={duration.toFixed(1)}
+              onChange={(e) => handleEndChange(e.target.value)}
+              step={0.1}
+              className="bg-transparent text-xl font-bold w-full outline-none tracking-tight"
+            />
+            <span className="text-[10px] font-mono font-bold text-[var(--muted)] mb-1">SEC</span>
+          </div>
+          {isErrorEnd && <AlertCircle size={12} className="absolute top-4 right-4 text-red-500" />}
+        </div>
+      </div>
+
+      {/* Mini Visual Rail */}
+      <div className="relative h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
+        <div 
+          className="absolute h-full bg-blue-500 transition-all duration-300"
+          style={{ 
+            left: `${(trimStart / duration) * 100}%`,
+            width: `${(( (trimEnd ?? duration) - trimStart) / duration) * 100}%`
+          }}
+        />
+      </div>
     </div>
   );
 }
