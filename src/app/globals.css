@@ -2,48 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Light mode tokens ── */
+/* ── Landing.LOVE Formal Studio (Premium Palette) ── */
 :root {
-  --bg: #F7F4F0;
-  --surface: #ffffff;
-  --border: #E8E3DC;
-  --text: #181412;
-  --muted: #5C5550;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --film-600: #e63946;
-  --film-400: #ff6b6b;
+  --bg: #FDFDFD;
+  --surface: #FFFFFF;
+  --border: #E8EBF0;
+  --text: #0A0A0B;
+  --muted: #8E96A3;
+  --accent: #0066FF;
+  --accent-hover: #0052CC;
+  --glass: rgba(255, 255, 255, 0.7);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.05);
+  --shadow-lg: 0 32px 64px -16px rgba(0,0,0,0.1);
 }
 
-/* ── Dark mode tokens ── */
+/* ── Landing.LOVE Formal Midnight ── */
 .dark {
-  --bg: #0f172a;
-  --surface: #1e293b;
-  --border: #334155;
-  --text: #f1f5f9;
-  --muted: #94a3b8;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg: #050505;
+  --surface: #101012;
+  --border: #1D1D21;
+  --text: #F5F5F7;
+  --muted: #6E6E73;
+  --accent: #0071E3;
+  --accent-hover: #0077ED;
+  --glass: rgba(10, 10, 11, 0.7);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.4);
+  --shadow-lg: 0 40px 100px -20px rgba(0,0,0,0.6);
 }
 
-/* ── Base styles ── */
+/* ── Global Normalization ── */
 body {
   background-color: var(--bg);
   color: var(--text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Smooth transitions for all themed elements */
+/* Premium Transitions */
 *,
 *::before,
 *::after {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: ease;
-  transition-duration: 200ms;
+  transition-property: background-color, border-color, color, transform, box-shadow, opacity, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 600ms;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 20px;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
 }
 
 :focus-visible {
-  outline: 2px solid #e63946;
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

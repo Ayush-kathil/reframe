@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Syne, DM_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Reframe — Resize, trim, and export videos in your browser",
@@ -45,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-<html lang="en" suppressHydrationWarning>
+<html lang="en" suppressHydrationWarning className={inter.className}>
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
@@ -77,20 +79,12 @@ export default function RootLayout({
         </a>
         <ThemeProvider>
           <ErrorBoundary>
-            <header
-              role="banner"
-              className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-[var(--border)] bg-[var(--bg)]"
-            >
-              <h1 className="text-lg font-semibold">Reframe</h1>
-              <ThemeToggle />
-            </header>
             <main role="main" id="main-content" tabIndex={-1}>
               {children}
             </main>
-            
           </ErrorBoundary>
         </ThemeProvider>
       </body>
     </html>
   );
-}
+}
