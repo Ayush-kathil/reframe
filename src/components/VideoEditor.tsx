@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useVideoEditor } from "@/hooks/useVideoEditor";
 import FileUpload from "./FileUpload";
 import VideoPreview from "./VideoPreview";
@@ -14,271 +14,351 @@ import ExportOverlay from "./ExportOverlay";
 import DownloadResult from "./DownloadResult";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
+import TextControl from "./TextControl";
+import EffectsControl from "./EffectsControl";
 import {
-  Layers, Crop, Scissors, RotateCw, Volume2,
-  SlidersHorizontal, Zap, AlertTriangle, Github
+  Video, LayoutTemplate, Type, Music, 
+  Sparkles, ArrowRightLeft, Undo2, Redo2, 
+  Download, Play, Pause, Maximize2, 
+  Volume2, Settings, HelpCircle, Layout,
+  Layers, Command, RotateCcw
 } from "lucide-react";
-
-interface SectionProps {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-  delay?: number;
-}
-
-function Section({ icon, title, children, delay = 0 }: SectionProps) {
-  return (
-    <div
-      className="space-y-3 animate-fade-in"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-film-500 opacity-80">{icon}</span>
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
-          {title}
-        </h3>
-        <div className="flex-1 h-px bg-[var(--border)]" />
-      </div>
-      {children}
-    </div>
-  );
-}
 
 export default function VideoEditor() {
   const {
-    file, duration, recipe, status, progress,
+    file, duration: totalDuration, recipe, status, progress,
     result, error, updateRecipe,
-    handleFileSelect, handleExport, cancelExport, reset, resetSettings,
+    handleFileSelect, handleExport, cancelExport, reset,
   } = useVideoEditor();
   
-  const [activeModule, setActiveModule] = useState<"resize" | "trim" | "color" | "rotate" | "export" | null>(null);
-  const [copied, setCopied] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState<string>("media");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
   const isProcessing = status === "loading-engine" || status === "exporting";
 
-  return (
-    <div className="min-h-screen w-full relative flex flex-col bg-[var(--bg)] text-[var(--text)] select-none">
-      <ExportOverlay status={status} progress={progress} onCancel={cancelExport} />
+  const navigation = useMemo(() => [
+    { id: "media", icon: <Video size={18} />, label: "Media" },
+    { id: "templates", icon: <LayoutTemplate size={18} />, label: "Canvas" },
+    { id: "text", icon: <Type size={18} />, label: "Typography" },
+    { id: "effects", icon: <Sparkles size={18} />, label: "Effects" },
+    { id: "audio", icon: <Music size={18} />, label: "Audio" },
+    { id: "transitions", icon: <ArrowRightLeft size={18} />, label: "Motion" },
+  ], []);
 
-      {/* Senior Level Header */}
-      <header className="sticky top-0 left-0 w-full px-8 py-4 flex items-center justify-between z-40 bg-[var(--bg)]/80 backdrop-blur-xl border-b border-[var(--border)]">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-8 bg-blue-600 rounded-full" />
-            <h1 className="text-2xl tracking-[0.2em] font-black uppercase">
-              REFRAME
-            </h1>
-          </div>
-          <div className="hidden md:flex items-center gap-3 px-3 py-1 bg-[var(--surface)] border border-[var(--border)] rounded-full text-[9px] font-bold uppercase tracking-widest text-[var(--muted)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            {file ? file.name : "Studio Engine Ready"}
-          </div>
+  return (
+    <div className="h-screen w-full flex bg-[var(--bg)] text-[var(--text)] overflow-hidden transition-google select-none font-sans">
+      <ExportOverlay status={status} progress={progress} onCancel={cancelExport} error={error} />
+
+      {/* ── Formal Navigation Rail ── */}
+      <aside className="w-[76px] glass-studio border-r flex flex-col items-center py-6 z-50">
+        <div className="w-10 h-10 bg-[var(--text)] text-[var(--bg)] rounded-xl flex items-center justify-center mb-10 shadow-lg active:scale-95 transition-google cursor-pointer">
+          <Command size={20} />
         </div>
         
-        <div className="flex items-center gap-3">
+        <nav className="flex-1 w-full px-2.5 space-y-3">
+          {navigation.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={cn(
+                "sidebar-item group",
+                activeTab === item.id && "sidebar-item-active"
+              )}
+            >
+              <div className="transition-google group-hover:scale-110">
+                {item.icon}
+              </div>
+              <span className="text-[8px] font-bold uppercase tracking-wider opacity-60">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="mt-auto flex flex-col items-center gap-6">
           <ThemeToggle />
-          <div className="w-px h-6 bg-[var(--border)] mx-1" />
-          
-          <button
-            onClick={handleExport}
-            disabled={!file || isProcessing}
-            className={cn(
-              "flex items-center gap-3 px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all",
-              !file || isProcessing
-                ? "bg-[var(--surface)] text-[var(--muted)] opacity-50 cursor-not-allowed"
-                : "bg-[var(--text)] text-[var(--bg)] hover:scale-105 active:scale-95 shadow-xl hover:shadow-blue-500/20"
-            )}
-          >
-            <Zap size={14} className={cn(isProcessing && "animate-spin")} />
-            {isProcessing ? "Processing" : "Process Now"}
+          <button className="p-3 text-[var(--muted)] hover:text-[var(--text)] transition-google">
+            <HelpCircle size={18} />
           </button>
         </div>
-      </header>
+      </aside>
 
-      {/* Main Visual Workspace with more space */}
-      <main className="flex-1 flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 relative mb-32">
-        {!file ? (
-          <div className="max-w-2xl w-full animate-in fade-in zoom-in-95 duration-700">
-            <FileUpload onFileSelect={handleFileSelect} currentFile={file} />
+      {/* ── Studio Canvas ── */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[var(--canvas)] relative transition-google">
+        
+        {/* Semantic Header */}
+        <header className="h-14 glass-studio border-b flex items-center justify-between px-6 z-40">
+          <div className="flex items-center gap-4">
+            <div className="px-3 py-1 bg-[var(--surface-hover)] rounded-lg border border-[var(--border)] flex items-center gap-2">
+              <Layers size={14} className="text-[var(--muted)]" />
+              <span className="text-xs font-bold tracking-tight">{file ? file.name : "Untitled Sequence"}</span>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <button className="p-2 text-[var(--muted)] hover:text-[var(--text)] transition-google"><Undo2 size={16} /></button>
+              <button className="p-2 text-[var(--muted)] hover:text-[var(--text)] transition-google"><Redo2 size={16} /></button>
+            </div>
           </div>
-        ) : (
-          <div className="w-full h-full max-w-7xl flex items-center justify-center animate-in fade-in zoom-in-105 duration-1000 ease-out">
-            <VideoPreview file={file} recipe={recipe} />
-          </div>
-        )}
 
-        {/* Modal-style Download Result */}
-        {(status === "error" || (status === "done" && result)) && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div 
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
-              onClick={reset}
-              onKeyDown={(e) => e.key === "Escape" && reset()}
-              role="button"
-              tabIndex={-1}
-              aria-label="Close modal"
-            />
-            <div className="relative w-full max-w-lg animate-in zoom-in-95 slide-in-from-bottom-4 duration-500">
-              {status === "error" && error && (
-                <div className="bg-[var(--surface)] border border-red-500/30 p-6 rounded-3xl shadow-2xl flex items-start gap-4">
-                  <AlertTriangle size={24} className="text-red-500 mt-1 shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1 text-left">Engine Warning</p>
-                    <p className="text-sm opacity-80 text-left leading-relaxed">{error}</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                if (window.confirm("Are you sure you want to clear the current sequence? All edits will be lost.")) {
+                  reset();
+                }
+              }}
+              disabled={!file || isProcessing}
+              className={cn(
+                "p-2 text-[var(--muted)] hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-google",
+                (!file || isProcessing) && "opacity-30 cursor-not-allowed"
+              )}
+              title="Reset Sequence"
+            >
+              <RotateCcw size={18} />
+            </button>
+
+            <button
+              onClick={handleExport}
+              disabled={!file || isProcessing}
+              className={cn(
+                "btn-primary flex items-center gap-2 py-2 px-6 text-xs uppercase tracking-widest",
+                (!file || isProcessing) && "opacity-50 grayscale cursor-not-allowed shadow-none"
+              )}
+            >
+              {isProcessing ? (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Download size={14} />
+              )}
+              {isProcessing ? "Rendering" : "Download Video"}
+            </button>
+          </div>
+        </header>
+
+        {/* Viewport Core */}
+        <div className="flex-1 relative flex items-center justify-center p-8 lg:p-16 overflow-hidden">
+          {/* Ambient Light Effect */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-[800px] h-[500px] bg-blue-500 rounded-full ambient-glow transition-all duration-1000" 
+                 style={{ opacity: file ? 0.15 : 0 }} />
+          </div>
+
+          <div className="relative w-full h-full max-w-[1200px] flex items-center justify-center animate-scale z-10">
+            {status === "done" && result ? (
+              <DownloadResult result={result} onReset={reset} />
+            ) : (
+              <div className="relative group">
+                <VideoPreview 
+                  file={file} 
+                  recipe={recipe} 
+                  playing={isPlaying}
+                  onTimeUpdate={setCurrentTime}
+                  onDurationChange={setVideoDuration}
+                />
+                
+                {/* HUD: Contextual Controls */}
+                {file && status !== "done" && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
                     <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(error);
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
-                      }}
-                      className="mt-4 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold rounded-full transition-colors"
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-google shadow-xl"
                     >
-                      {copied ? "COPIED TO CLIPBOARD" : "COPY ERROR LOG"}
+                      {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+                    </button>
+                    <div className="flex flex-col gap-1.5 min-w-[140px]">
+                       <div className="flex items-center justify-between text-[8px] font-black font-mono text-white/50 uppercase tracking-widest">
+                          <span>{Math.floor(currentTime)}s</span>
+                          <span>{Math.floor(videoDuration)}s</span>
+                       </div>
+                       <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width: `${(currentTime/videoDuration)*100}%` }} />
+                       </div>
+                    </div>
+                    <div className="h-6 w-px bg-white/10" />
+                    <button className="p-2 text-white/50 hover:text-white transition-google"><Volume2 size={16} /></button>
+                    <button className="p-2 text-white/50 hover:text-white transition-google"><Maximize2 size={16} /></button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pro Timeline Interface */}
+        <footer className="h-20 glass-studio border-t flex items-center px-8 gap-10 z-40">
+           <div className="flex items-center gap-3 shrink-0">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="label-mono">Master Timeline</span>
+           </div>
+           <div className="flex-1 max-w-4xl">
+              <TrimControl 
+                duration={totalDuration} 
+                trimStart={recipe.trimStart} 
+                trimEnd={recipe.trimEnd} 
+                onChange={updateRecipe} 
+              />
+           </div>
+           <div className="flex items-center gap-4 shrink-0">
+              <div className="text-[11px] font-mono font-bold text-[var(--muted)]">
+                 <span className="text-[var(--text)]">{Math.floor(currentTime).toString().padStart(2, '0')}</span>
+                 <span className="opacity-40"> : 00 : 00</span>
+              </div>
+              <button className="p-2 text-[var(--muted)] hover:text-[var(--text)] transition-google">
+                 <Settings size={16} />
+              </button>
+           </div>
+        </footer>
+      </main>
+
+      {/* ── Property Inspector ── */}
+      <aside className="w-[360px] glass-studio border-l overflow-y-auto custom-scrollbar z-40 animate-in slide-in-from-right duration-500">
+        <div className="p-8 space-y-10 pb-40">
+          
+          <div className="space-y-1 animate-entrance">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted)]">Inspector</h2>
+            <div className="h-0.5 w-8 bg-[var(--accent-cta)] rounded-full" />
+          </div>
+
+          {activeTab === "media" && (
+            <div className="space-y-8 animate-entrance">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold tracking-tight">Sequence Assets</h3>
+                <p className="text-xs text-[var(--muted)]">Manage your source high-fidelity media.</p>
+              </div>
+              
+              <FileUpload onFileSelect={handleFileSelect} file={file} isProcessing={isProcessing} />
+              
+              {file && (
+                <div className="p-6 bg-[var(--surface-hover)] border border-[var(--border)] rounded-2xl space-y-4 animate-scale">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-[var(--muted)]">Encoding</span>
+                    <span>{file.name.split('.').pop()?.toUpperCase()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-[var(--muted)]">Resolution</span>
+                    <span>4K Native</span>
+                  </div>
+                  <button 
+                    onClick={reset}
+                    className="w-full py-3 bg-red-500/10 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-google"
+                  >
+                    Evict Asset
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "templates" && (
+            <div className="space-y-8 animate-entrance">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold tracking-tight">Canvas Layout</h3>
+                <p className="text-xs text-[var(--muted)]">Define the spatial resolution of the output.</p>
+              </div>
+              <PresetSelector recipe={recipe} onChange={updateRecipe} />
+            </div>
+          )}
+
+          {activeTab === "text" && (
+             <div className="animate-entrance">
+               <TextControl recipe={recipe} onChange={updateRecipe} />
+             </div>
+          )}
+
+          {activeTab === "effects" && (
+            <div className="animate-entrance">
+              <EffectsControl recipe={recipe} onChange={updateRecipe} />
+            </div>
+          )}
+
+          {activeTab === "transitions" && (
+            <div className="space-y-8 animate-entrance">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold tracking-tight">Spatial Transforms</h3>
+                <p className="text-xs text-[var(--muted)]">Adjust the geometry of the viewport.</p>
+              </div>
+              <div className="space-y-10 p-8 bg-[var(--surface-hover)] border border-[var(--border)] rounded-[2.5rem]">
+                <div className="space-y-4">
+                  <p className="label-mono">Framing Logic</p>
+                  <FramingControl recipe={recipe} onChange={updateRecipe} />
+                </div>
+                
+                <div className="w-full h-px bg-[var(--border)]" />
+                
+                <div className="space-y-4">
+                  <p className="label-mono">Mirroring Axis</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => updateRecipe({ flipH: !recipe.flipH })}
+                      className={cn(
+                        "py-4 rounded-xl border flex flex-col items-center gap-3 transition-google",
+                        recipe.flipH ? "bg-[var(--text)] text-[var(--bg)]" : "bg-[var(--surface)] border-[var(--border)] text-[var(--muted)]"
+                      )}
+                    >
+                      <ArrowRightLeft size={16} />
+                      <span className="text-[9px] font-bold uppercase">Horizontal</span>
+                    </button>
+                    <button
+                      onClick={() => updateRecipe({ flipV: !recipe.flipV })}
+                      className={cn(
+                        "py-4 rounded-xl border flex flex-col items-center gap-3 transition-google",
+                        recipe.flipV ? "bg-[var(--text)] text-[var(--bg)]" : "bg-[var(--surface)] border-[var(--border)] text-[var(--muted)]"
+                      )}
+                    >
+                      <Layout size={16} className="rotate-180" />
+                      <span className="text-[9px] font-bold uppercase">Vertical</span>
                     </button>
                   </div>
                 </div>
-              )}
-              {status === "done" && result && (
-                <div className="shadow-2xl shadow-black/50">
-                  <DownloadResult result={result} onReset={reset} />
+
+                <div className="w-full h-px bg-[var(--border)]" />
+                <div className="space-y-4">
+                   <p className="label-mono">Angular Rotation</p>
+                   <RotateControl recipe={recipe} onChange={updateRecipe} />
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Horizontal Taskbar */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] max-w-5xl z-50">
-        
-        {/* Contextual Settings Tray */}
-        <div className={cn(
-          "mb-6 bg-[var(--surface)]/80 backdrop-blur-3xl border border-[var(--border)] rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 ease-in-out",
-          activeModule ? "max-h-72 opacity-100 p-8" : "max-h-0 opacity-0 p-0"
-        )}>
-          {activeModule === "resize" && (
-            <div className="flex flex-col md:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6">Output Dimensions</p>
-                <PresetSelector recipe={recipe} onChange={updateRecipe} />
-              </div>
-              <div className="w-px bg-[var(--border)] hidden md:block" />
-              <div className="w-full md:w-64">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6">Canvas Framing</p>
-                <FramingControl recipe={recipe} onChange={updateRecipe} />
               </div>
             </div>
           )}
 
-          {activeModule === "trim" && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6 text-center">Precise Time Range</p>
-              <TrimControl recipe={recipe} onChange={updateRecipe} duration={duration} />
-            </div>
-          )}
-
-          {activeModule === "color" && (
-            <div className="flex flex-col md:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="flex-1 space-y-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Visual Tuner</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                  {[
-                    { label: "Brightness", key: "brightness", min: -1, max: 1, step: 0.1, default: 0 },
-                    { label: "Contrast", key: "contrast", min: 0, max: 2, step: 0.1, default: 1 },
-                    { label: "Saturation", key: "saturation", min: 0, max: 3, step: 0.1, default: 1 },
-                  ].map((adj) => (
-                    <div key={adj.key} className="space-y-3">
-                      <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider">
-                        <span className="opacity-60">{adj.label}</span>
-                        <button onClick={() => updateRecipe({ [adj.key]: adj.default })} className="text-blue-500 hover:text-blue-400">RESET</button>
-                      </div>
-                      <input
-                        type="range" min={adj.min} max={adj.max} step={adj.step}
-                        value={(recipe as any)[adj.key]}
-                        onChange={(e) => updateRecipe({ [adj.key]: Number(e.target.value) })}
-                        className="w-full accent-blue-600 h-1.5 bg-[var(--border)] rounded-full appearance-none cursor-pointer"
-                      />
+          {activeTab === "audio" && (
+            <div className="space-y-8 animate-entrance">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold tracking-tight">Sonic Master</h3>
+                <p className="text-xs text-[var(--muted)]">Adjust timing and gain for the audio stream.</p>
+              </div>
+              <div className="space-y-10 p-8 bg-[var(--surface-hover)] border border-[var(--border)] rounded-3xl">
+                 <AudioSpeedControl recipe={recipe} onChange={updateRecipe} />
+                 
+                 <div className="w-full h-px bg-[var(--border)]" />
+                 
+                 <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="label-mono">Master Gain</span>
+                      <span className="text-[10px] font-mono font-bold">{(recipe.volume * 100).toFixed(0)}%</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div className="w-px bg-[var(--border)] hidden md:block" />
-              <div className="w-full md:w-64">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6">Speed & Audio</p>
-                <AudioSpeedControl recipe={recipe} onChange={updateRecipe} />
+                    <input
+                      type="range" min={0} max={2} step={0.1}
+                      value={recipe.volume}
+                      onChange={(e) => updateRecipe({ volume: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
               </div>
             </div>
           )}
 
-          {activeModule === "rotate" && (
-            <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6 text-center">Orientation</p>
-              <RotateControl recipe={recipe} onChange={updateRecipe} />
-            </div>
-          )}
-
-          {activeModule === "export" && (
-            <div className="flex flex-col md:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6">Container Format</p>
-                <FormatSelector recipe={recipe} onChange={updateRecipe} />
+          {file && (
+            <div className="pt-10 border-t border-[var(--border)] space-y-8 animate-entrance">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold tracking-tight">Output Stream</h3>
+                <p className="text-xs text-[var(--muted)]">Configure the final delivery specifications.</p>
               </div>
-              <div className="w-px bg-[var(--border)] hidden md:block" />
-              <div className="w-full md:w-64">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] mb-6">Export Quality</p>
-                <ExportSettings recipe={recipe} onChange={updateRecipe} />
+              <div className="p-8 bg-[var(--surface-hover)] border border-[var(--border)] rounded-3xl space-y-10">
+                 <FormatSelector recipe={recipe} onChange={updateRecipe} />
+                 <ExportSettings recipe={recipe} onChange={updateRecipe} />
               </div>
             </div>
           )}
         </div>
-
-        {/* Main Dock */}
-        <div className={cn(
-          "bg-[var(--surface)]/90 backdrop-blur-2xl border border-[var(--border)] rounded-[2.5rem] p-2 flex items-center shadow-2xl transition-all duration-500",
-          !file && "opacity-20 pointer-events-none scale-95"
-        )}>
-          <div className="flex-1 flex items-center justify-center gap-1 p-1">
-            {[
-              { id: "resize", icon: <Layers size={18} />, label: "Resize" },
-              { id: "trim", icon: <Scissors size={18} />, label: "Trim" },
-              { id: "color", icon: <SlidersHorizontal size={18} />, label: "Color" },
-              { id: "rotate", icon: <RotateCw size={18} />, label: "Rotate" },
-              { id: "export", icon: <Crop size={18} />, label: "Export Settings" },
-            ].map((tool) => (
-              <button
-                key={tool.id}
-                onClick={() => setActiveModule(activeModule === tool.id ? null : tool.id as any)}
-                className={cn(
-                  "flex items-center gap-3 px-8 py-3.5 rounded-[2rem] transition-all relative group",
-                  activeModule === tool.id 
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105" 
-                    : "text-[var(--muted)] hover:bg-[var(--bg)] hover:text-[var(--text)]"
-                )}
-              >
-                {tool.icon}
-                <span className="hidden md:block text-xs font-bold uppercase tracking-widest">{tool.label}</span>
-                {activeModule === tool.id && (
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 pr-2">
-            <button
-              onClick={resetSettings}
-              className="p-4 text-[var(--muted)] hover:text-red-500 transition-colors"
-              title="Reset All"
-            >
-              <RotateCw size={18} />
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Decorative Grid Backdrop */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]" 
-           style={{ backgroundImage: 'radial-gradient(var(--text) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
+      </aside>
     </div>
   );
 }
