@@ -116,8 +116,16 @@ export default function DashboardView({
             {projects.map((project) => (
               <div
                 key={project.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelectProject(project.id)}
-                className="group relative soft-ui-panel rounded-2xl p-5 cursor-pointer flex flex-col justify-between h-44"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectProject(project.id);
+                  }
+                }}
+                className="group relative soft-ui-panel rounded-2xl p-5 cursor-pointer flex flex-col justify-between h-44 text-left"
               >
                 <div>
                   <div className="flex justify-between items-start gap-2">

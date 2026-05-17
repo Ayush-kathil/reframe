@@ -90,8 +90,16 @@ export default function MediaLibraryView({
                 return (
                   <div
                     key={media.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => onSelectMedia(media)}
-                    className={`group relative bg-surface border rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg hover:shadow-shadow/50 flex flex-col justify-between h-40 ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSelectMedia(media);
+                      }
+                    }}
+                    className={`group relative bg-surface border rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg hover:shadow-shadow/50 flex flex-col justify-between h-40 text-left ${
                       isSelected
                         ? "border-accent ring-1 ring-accent"
                         : "border-border hover:border-accent"

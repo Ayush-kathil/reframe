@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useVideoEditor } from "@/hooks/useVideoEditor";
 import { cn } from "@/lib/utils";
 import { EditRecipe, ExportResult, ExportStatus } from "@/lib/types";
@@ -74,6 +74,14 @@ export default function VideoEditor() {
   const [projectTitle, setProjectTitle] = useState("Composition 1");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState("");
+
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditingTitle) {
+      titleInputRef.current?.focus();
+    }
+  }, [isEditingTitle]);
 
   // Media Library state
   const [mediaFiles, setMediaFiles] = useState<CachedMedia[]>([]);
@@ -295,8 +303,16 @@ export default function VideoEditor() {
           <div className="flex items-center justify-between px-4 py-5 border-b border-border">
             {!sidebarCollapsed && (
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setCurrentTab("landing")}
-                className="flex items-center gap-2 cursor-pointer group"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setCurrentTab("landing");
+                  }
+                }}
+                className="flex items-center gap-2 cursor-pointer group text-left"
               >
                 <Film className="w-5 h-5 text-accent animate-pulse" />
                 <span className="font-display font-black text-sm uppercase tracking-widest text-text group-hover:text-accent transition-colors">
@@ -305,10 +321,13 @@ export default function VideoEditor() {
               </div>
             )}
             {sidebarCollapsed && (
-              <Film
+              <button
                 onClick={() => setCurrentTab("landing")}
-                className="w-5 h-5 mx-auto text-accent cursor-pointer hover:rotate-12 transition-transform"
-              />
+                className="w-5 h-5 mx-auto text-accent cursor-pointer hover:rotate-12 transition-transform focus:outline-none focus:ring-1 focus:ring-accent rounded flex items-center justify-center"
+                aria-label="Go to Landing Page"
+              >
+                <Film className="w-5 h-5" />
+              </button>
             )}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -368,8 +387,23 @@ export default function VideoEditor() {
 
       {/* Mobile Header Bottom drawers */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-          <aside className="w-64 h-full bg-surface border-r border-border p-5 space-y-6 flex flex-col justify-between" onClick={(e) => e.stopPropagation()}>
+        <div
+          role="button"
+          tabIndex={-1}
+          aria-label="Close Mobile Navigation"
+          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setMobileMenuOpen(false);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setMobileMenuOpen(false);
+            }
+          }}
+        >
+          <aside className="w-64 h-full bg-surface border-r border-border p-5 space-y-6 flex flex-col justify-between">
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <span className="font-display font-black text-sm uppercase tracking-widest">LUMINA CUT</span>
@@ -420,20 +454,31 @@ export default function VideoEditor() {
               {isEditingTitle ? (
                 <div className="flex items-center gap-1">
                   <input
+                    ref={titleInputRef}
                     type="text"
                     value={tempTitle}
                     onChange={(e) => setTempTitle(e.target.value)}
                     onBlur={saveTitle}
                     onKeyDown={(e) => e.key === "Enter" && saveTitle()}
                     className="px-2 py-1 bg-bg border border-accent rounded-lg text-sm font-heading font-bold outline-none"
-                    autoFocus
                   />
                   <button onClick={saveTitle} className="p-1 text-secondary hover:bg-bg rounded">
                     <Check className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 group cursor-pointer" onClick={startEditingTitle}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={startEditingTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      startEditingTitle();
+                    }
+                  }}
+                  className="flex items-center gap-2 group cursor-pointer text-left"
+                >
                   <h1 className="font-heading font-bold text-sm tracking-wide text-text truncate group-hover:text-accent transition-colors">
                     {projectTitle}
                   </h1>
