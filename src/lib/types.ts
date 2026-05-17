@@ -5,7 +5,7 @@ export interface EditRecipe {
   framing: "fit" | "fill";
   trimStart: number;
   trimEnd: number | null;
-  rotate: 0 | 90 | 180 | 270;
+  rotate: number;
   keepAudio: boolean;
   speed: number;
   quality: number;
@@ -15,6 +15,21 @@ export interface EditRecipe {
   contrast: number;
   saturation: number;
   soundOnCompletion: boolean;
+  hueRotate: number;
+  sepia: number;
+  grayscale: number;
+  blur: number;
+  opacity: number;
+  invert: boolean;
+  sharpen: number;
+  noise: number;
+  vignette: number;
+  colorBalanceR: number;
+  colorBalanceG: number;
+  colorBalanceB: number;
+  flipH: boolean;
+  flipV: boolean;
+  volume: number;
 }
 
 export interface ExportResult {
@@ -51,6 +66,21 @@ export const DEFAULT_RECIPE: EditRecipe = {
   saturation: 0,
   stabilization: false,
   soundOnCompletion: false,
+  hueRotate: 0,
+  sepia: 0,
+  grayscale: 0,
+  blur: 0,
+  opacity: 1,
+  invert: false,
+  sharpen: 0,
+  noise: 0,
+  vignette: 0,
+  colorBalanceR: 0,
+  colorBalanceG: 0,
+  colorBalanceB: 0,
+  flipH: false,
+  flipV: false,
+  volume: 1,
 };
 
 export const MAX_FILE_SIZE =

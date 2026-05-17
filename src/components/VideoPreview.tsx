@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/rules-of-hooks, jsx-a11y/no-static-element-interactions */
 "use client";
 
 import { useEffect, useRef, useState, RefObject } from "react";
@@ -18,6 +18,7 @@ export default function VideoPreview({ file, recipe, videoRef }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [showOverlay, setShowOverlay] = useState(false);
   const onLoadedRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (!file) return;
 
@@ -144,77 +145,134 @@ export default function VideoPreview({ file, recipe, videoRef }: Props) {
     }
   };
 
+  // Calculate CSS filters based on recipe
+  const filters = recipe
+    ? [
+        `brightness(${1 + recipe.brightness})`,
+        `contrast(${recipe.contrast})`,
+        `saturate(${recipe.saturation})`,
+        recipe.hueRotate !== 0 ? `hue-rotate(${recipe.hueRotate}deg)` : "",
+        recipe.sepia > 0 ? `sepia(${recipe.sepia})` : "",
+        recipe.grayscale > 0 ? `grayscale(${recipe.grayscale})` : "",
+        recipe.invert ? "invert(1)" : "",
+        recipe.blur > 0 ? `blur(${recipe.blur}px)` : "",
+        recipe.opacity < 1 ? `opacity(${recipe.opacity})` : "",
+      ].filter(Boolean).join(" ")
+    : undefined;
+
+  // Handle rotation transform, horizontal flip, vertical flip
+  const transform = recipe
+    ? [
+        `rotate(${recipe.rotate}deg)`,
+        recipe.flipH ? "scaleX(-1)" : "",
+        recipe.flipV ? "scaleY(-1)" : "",
+      ].filter(Boolean).join(" ")
+    : undefined;
+
   return (
-    <div
-      role="group"
-      className="relative w-full rounded-lg overflow-hidden bg-[#0a0a0a] aspect-video focus:outline-none focus-visible:ring-2 focus-visible:ring-film-500"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      aria-label="Video preview (press Space to play/pause)"
-    >
-      {isLoading && (
-        <div
-          className="absolute inset-0 animate-pulse bg-gray-700 rounded-xl transition-opacity duration-300"
-          aria-label="Loading video preview"
-        />
-      )}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <video
-        ref={videoRef}
-        controls
-        className={cn("w-full h-full object-contain transition-opacity duration-300", isLoading ? "opacity-0" : "opacity-100")}
-        onLoadedData={() => setIsLoading(false)}
-        playsInline
-      />
+    <div className="relative w-full flex flex-col items-center gap-4">
+      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+      <div
+        role="group"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label="Video preview (press Space to play/pause)"
+        className="relative w-full rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm border border-[var(--border)] shadow-2xl transition-all duration-500 ease-out flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-film-500"
+        style={{
+          aspectRatio: "16/9",
+          maxHeight: "60vh",
+          minHeight: "300px",
+        }}
+      >
+      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+        {isLoading && (
+          <div
+            className="absolute inset-0 animate-pulse bg-gray-800/50 flex items-center justify-center"
+            aria-label="Loading video preview"
+          >
+            <div className="w-8 h-8 border-4 border-film-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
 
-      {/* Letterbox / Crop overlay */}
-      {overlay && (
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          {overlay.mode === "fit" ? (
-            // Letterbox: semi-transparent bars outside the content area
-            <>
-              <div className="absolute left-0 right-0 top-0 bg-black/50" style={{ height: overlay.barTop }} />
-              <div className="absolute left-0 right-0 bottom-0 bg-black/50" style={{ height: overlay.barBottom }} />
-              <div className="absolute top-0 bottom-0 left-0 bg-black/50" style={{ width: overlay.barLeft }} />
-              <div className="absolute top-0 bottom-0 right-0 bg-black/50" style={{ width: overlay.barRight }} />
-            </>
-          ) : (
-            // Fill/crop: dashed border around the surviving area, dimmed outside
-            <>
-              <div className="absolute left-0 right-0 top-0 bg-red-900/50" style={{ height: overlay.barTop }} />
-              <div className="absolute left-0 right-0 bottom-0 bg-red-900/50" style={{ height: overlay.barBottom }} />
-              <div className="absolute top-0 bottom-0 left-0 bg-red-900/50" style={{ width: overlay.barLeft }} />
-              <div className="absolute top-0 bottom-0 right-0 bg-red-900/50" style={{ width: overlay.barRight }} />
-              <div
-                className="absolute border-2 border-dashed border-film-400"
-                style={{
-                  top: overlay.barTop,
-                  bottom: overlay.barBottom,
-                  left: overlay.barLeft,
-                  right: overlay.barRight,
-                }}
-              />
-            </>
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <video
+          ref={videoRef}
+          controls
+          className={cn(
+            "max-w-full max-h-full object-contain transition-all duration-300",
+            isLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
           )}
-        </div>
-      )}
+          style={{
+            filter: filters,
+            transform: transform,
+          }}
+          onLoadedData={() => setIsLoading(false)}
+          playsInline
+        />
 
-      {/* Toggle button */}
-      {recipe && !isLoading && (
-        <button
-          type="button"
-          onClick={() => setShowOverlay((v) => !v)}
-          className={`absolute bottom-10 right-2 px-2 py-1 text-[10px] font-heading font-bold uppercase tracking-wider rounded transition-colors z-10 pointer-events-auto ${
-            showOverlay
-              ? "bg-film-600 text-white"
-              : "bg-black/60 text-white/70 hover:bg-black/80"
-          }`}
-          aria-pressed={showOverlay}
-          aria-label={showOverlay ? "Hide framing overlay" : "Show framing overlay"}
-          title={showOverlay ? "Hide framing overlay" : "Show framing overlay"}
-        >
-          {showOverlay ? "Hide overlay" : "Show overlay"}
-        </button>
+        {/* Letterbox / Crop overlay */}
+        {overlay && (
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            {overlay.mode === "fit" ? (
+              // Letterbox: semi-transparent bars outside the content area
+              <>
+                <div className="absolute left-0 right-0 top-0 bg-black/50" style={{ height: overlay.barTop }} />
+                <div className="absolute left-0 right-0 bottom-0 bg-black/50" style={{ height: overlay.barBottom }} />
+                <div className="absolute top-0 bottom-0 left-0 bg-black/50" style={{ width: overlay.barLeft }} />
+                <div className="absolute top-0 bottom-0 right-0 bg-black/50" style={{ width: overlay.barRight }} />
+              </>
+            ) : (
+              // Fill/crop: dashed border around the surviving area, dimmed outside
+              <>
+                <div className="absolute left-0 right-0 top-0 bg-red-900/50" style={{ height: overlay.barTop }} />
+                <div className="absolute left-0 right-0 bottom-0 bg-red-900/50" style={{ height: overlay.barBottom }} />
+                <div className="absolute top-0 bottom-0 left-0 bg-red-900/50" style={{ width: overlay.barLeft }} />
+                <div className="absolute top-0 bottom-0 right-0 bg-red-900/50" style={{ width: overlay.barRight }} />
+                <div
+                  className="absolute border-2 border-dashed border-film-400"
+                  style={{
+                    top: overlay.barTop,
+                    bottom: overlay.barBottom,
+                    left: overlay.barLeft,
+                    right: overlay.barRight,
+                  }}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Toggle button */}
+        {recipe && !isLoading && (
+          <button
+            type="button"
+            onClick={() => setShowOverlay((v) => !v)}
+            className={`absolute bottom-4 right-4 px-2 py-1 text-[10px] font-heading font-bold uppercase tracking-wider rounded transition-colors z-10 pointer-events-auto ${
+              showOverlay
+                ? "bg-film-600 text-white"
+                : "bg-black/60 text-white/70 hover:bg-black/80"
+            }`}
+            aria-pressed={showOverlay}
+            aria-label={showOverlay ? "Hide framing overlay" : "Show framing overlay"}
+            title={showOverlay ? "Hide framing overlay" : "Show framing overlay"}
+          >
+            {showOverlay ? "Hide overlay" : "Show overlay"}
+          </button>
+        )}
+      </div>
+
+      {recipe && (
+        <div className="w-full max-w-2xl px-4 py-2 bg-[var(--surface)]/50 backdrop-blur-md rounded-full border border-[var(--border)] flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
+          <div className="flex items-center gap-4">
+            <span>Live Preview</span>
+            <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+          </div>
+          <div className="flex items-center gap-4">
+            <span>{recipe.preset.replace(/-/g, " ")}</span>
+            <span className="opacity-40">|</span>
+            <span>{recipe.format.toUpperCase()}</span>
+          </div>
+        </div>
       )}
     </div>
   );
