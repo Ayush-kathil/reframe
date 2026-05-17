@@ -275,7 +275,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
             {/* Blur */}
             <div className="space-y-2">
               <div className="flex justify-between font-mono">
-                <span>Blur Blur</span>
+                <span>Lens Blur</span>
                 <span className="text-accent">{recipe.blur}px</span>
               </div>
               <input
@@ -292,7 +292,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
             {/* Sharpen */}
             <div className="space-y-2">
               <div className="flex justify-between font-mono">
-                <span>Sharpen Amount</span>
+                <span>Sharpening</span>
                 <span className="text-accent">{recipe.sharpen.toFixed(1)}</span>
               </div>
               <input

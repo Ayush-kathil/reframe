@@ -19,17 +19,17 @@
 
 /* ── Dark Mode / Premium Cinematic Charcoal ── */
 .dark {
-  --bg: #131313;
-  --surface: #1E1E1E;
-  --border: #2A2A2A;
-  --text: #E5E2E1;
-  --muted: #988D9F;
-  --accent: #A855F7;
-  --accent-hover: #B76DFF;
-  --secondary: #2DD4BF;
-  --secondary-hover: #3CDDC7;
-  --tertiary: #3B82F6;
-  --shadow: rgba(0, 0, 0, 0.4);
+  --bg: #09090b; /* Ultra-deep pitch workspace */
+  --surface: #121214; /* Surgical charcoal panel */
+  --border: rgba(255, 255, 255, 0.04); /* Ultra-soft borders for premium feel */
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --accent: #a855f7;
+  --accent-hover: #b76dff;
+  --secondary: #2dd4bf;
+  --secondary-hover: #3cddc7;
+  --tertiary: #3b82f6;
+  --shadow: rgba(0, 0, 0, 0.8);
 }
 
 /* ── Custom Utilities & Premium Scrollbars ── */
@@ -63,7 +63,25 @@
   }
 }
 
-/* ── Micro-Animations & Interactivity ── */
+/* ── Premium Soft-UI Panels & Animations ── */
+.soft-ui-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .soft-ui-panel {
+  box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(145deg, #131315, #0f0f11);
+}
+
+.soft-ui-panel:hover {
+  border-color: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.08);
+  transform: translateY(-2px);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

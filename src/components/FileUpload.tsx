@@ -84,15 +84,17 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
   };
 
   const FileInfo = () => (
-    <div className="flex items-center gap-3 px-4 py-3 bg-film-50 border border-film-200 rounded-lg">
-      <Film size={18} className="text-film-600 shrink-0" />
+    <div className="flex items-center gap-4 px-5 py-4 bg-accent/5 border border-accent/10 rounded-xl animate-fade-in shadow-[0_4px_20px_rgba(168,85,247,0.03)] backdrop-blur-sm">
+      <div className="p-3 bg-accent/10 rounded-lg text-accent animate-pulse">
+        <Film size={20} />
+      </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--text)] truncate">
+        <p className="text-sm font-bold text-text truncate">
           {currentFile?.name}
         </p>
 
-        <p className="text-xs text-[var(--muted)]">
+        <p className="text-[11px] text-muted font-mono mt-0.5">
           {formatBytes(currentFile?.size ?? 0)}
           {duration !== null
             ? ` • ${formatDuration(duration)}`
@@ -103,10 +105,10 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="text-xs font-semibold text-film-600 hover:text-film-700 uppercase tracking-wide"
+        className="text-xs font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wider font-mono flex flex-col items-end gap-0.5"
       >
-        Change
-        <span className="text-[var(--muted)] ml-1">(Ctrl+O)</span>
+        <span>Change</span>
+        <span className="text-[9px] text-muted font-normal lowercase">(Ctrl+O)</span>
       </button>
 
       <input
@@ -140,43 +142,55 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
         }
       }}
       className={cn(
-        "group flex flex-col items-center justify-center gap-4 py-12 px-6",
-        "border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200",
+        "group flex flex-col items-center justify-center gap-5 py-14 px-6 relative overflow-hidden",
+        "border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-500 ease-out",
         dragging
-          ? "border-film-500 bg-film-50 scale-[1.01]"
-          : "border-[var(--border)] bg-[var(--bg)] hover:border-film-400 hover:bg-film-50/40"
+          ? "border-accent bg-accent/5 scale-[1.02] shadow-[0_15px_40px_-10px_rgba(168,85,247,0.15)]"
+          : "border-border bg-surface hover:border-accent/40 hover:bg-accent/[0.01] hover:scale-[1.01] hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.05)]"
       )}
     >
-      <div className="w-20 h-20 opacity-80 group-hover:opacity-100 transition">
-        <LottiePlayer animationData={uploadAnim} loop autoplay />
+      {/* Background Ambient Glow on Dragging */}
+      <div className={cn(
+        "absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none transition-opacity duration-500",
+        dragging ? "opacity-100" : "opacity-0"
+      )} />
+
+      {/* Lottie Animation Hub */}
+      <div className="relative z-10 w-24 h-24 flex items-center justify-center">
+        {/* Decorative dynamic pulsing circles */}
+        <div className="absolute inset-0 rounded-full bg-accent/5 scale-75 group-hover:scale-100 group-hover:animate-ping opacity-30 transition-all duration-700" />
+        <div className="absolute inset-2 rounded-full bg-accent/10 scale-90 group-hover:scale-105 transition-all duration-500" />
+        <div className="w-20 h-20 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 relative z-10">
+          <LottiePlayer animationData={uploadAnim} loop autoplay />
+        </div>
       </div>
 
-      <div className="text-center">
-        <p className="font-semibold text-[var(--text)]">
-          {dragging ? "Release to upload" : "Drag & Drop your video here"}
+      <div className="text-center relative z-10">
+        <p className="font-heading font-extrabold text-sm text-text uppercase tracking-wider group-hover:text-accent transition-colors">
+          {dragging ? "Release to upload" : "Drag & Drop your video"}
         </p>
 
-        <p className="text-sm text-[var(--muted)] mt-1">
-          or click to browse
+        <p className="text-xs text-muted mt-1.5 font-sans">
+          or <span className="text-accent font-semibold underline group-hover:text-accent-hover transition-colors">click to browse local files</span>
         </p>
 
-        <p className="text-xs text-[var(--muted)] mt-2">
+        <p className="text-[10px] text-muted/60 mt-3 font-mono border border-border/40 px-2 py-0.5 rounded bg-bg/50 inline-block">
           Ctrl+O / Cmd+O
         </p>
       </div>
 
-      <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--muted)]">
-        <FolderOpen size={14} />
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-bg border border-border rounded-lg text-[10px] text-muted font-mono tracking-wider uppercase relative z-10">
+        <FolderOpen size={12} className="text-accent" />
         MP4 / MOV / AVI / WebM
       </div>
 
-      <p className="text-xs text-gray-500 text-center">
-        Supports most common video formats up to 2GB
+      <p className="text-[10px] text-muted/50 text-center relative z-10">
+        Supports high-density codec profiles up to 2GB
       </p>
 
       {/* Show file size preview if file exists */}
       {currentFile && (
-        <p className="text-xs text-[var(--muted)] mt-2">
+        <p className="text-xs text-accent mt-2 font-mono">
           Selected: {formatBytes(currentFile.size)}
         </p>
       )}

@@ -58,7 +58,7 @@ export default function DashboardView({
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="p-5 bg-surface border border-border rounded-xl flex items-center gap-4">
+        <div className="soft-ui-panel rounded-2xl p-5 flex items-center gap-4">
           <div className="p-3 bg-accent/10 border border-accent/20 rounded-lg text-accent">
             <Film className="w-5 h-5" />
           </div>
@@ -68,7 +68,7 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className="p-5 bg-surface border border-border rounded-xl flex items-center gap-4">
+        <div className="soft-ui-panel rounded-2xl p-5 flex items-center gap-4">
           <div className="p-3 bg-secondary/10 border border-secondary/20 rounded-lg text-secondary">
             <HardDrive className="w-5 h-5" />
           </div>
@@ -78,7 +78,7 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className="p-5 bg-surface border border-border rounded-xl flex items-center gap-4">
+        <div className="soft-ui-panel rounded-2xl p-5 flex items-center gap-4">
           <div className="p-3 bg-tertiary/10 border border-tertiary/20 rounded-lg text-tertiary">
             <Cpu className="w-5 h-5" />
           </div>
@@ -117,7 +117,7 @@ export default function DashboardView({
               <div
                 key={project.id}
                 onClick={() => onSelectProject(project.id)}
-                className="group relative bg-surface border border-border rounded-xl p-5 hover:border-accent transition-all cursor-pointer hover:shadow-lg hover:shadow-shadow/50 flex flex-col justify-between h-44"
+                className="group relative soft-ui-panel rounded-2xl p-5 cursor-pointer flex flex-col justify-between h-44"
               >
                 <div>
                   <div className="flex justify-between items-start gap-2">
