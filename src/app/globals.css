@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Roboto:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,10 +36,14 @@
 
 /* ── Custom Utilities & Premium Scrollbars ── */
 @layer base {
+  *, ::before, ::after {
+    border-color: var(--border);
+  }
+
   body {
     background-color: var(--bg);
     color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Roboto', 'Google Sans Text', 'Google Sans', system-ui, sans-serif;
     transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -108,4 +114,129 @@
   background: rgba(30, 30, 30, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
+}
+
+/* ── Premium Modern Custom Range Sliders ── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Track styling */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  height: 6px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-runnable-track {
+  background: rgba(168, 85, 247, 0.05);
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+/* Thumb styling */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -5px; /* Center thumb on track */
+  background-color: var(--accent);
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background-color: var(--accent-hover);
+  transform: scale(1.2);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
+
+/* Firefox Track styling */
+input[type="range"]::-moz-range-track {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  height: 6px;
+  border-radius: 9999px;
+}
+
+/* Firefox Thumb styling */
+input[type="range"]::-moz-range-thumb {
+  background-color: var(--accent);
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background-color: var(--accent-hover);
+  transform: scale(1.2);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
+
+/* Active focus outline */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* Color-specific thumbs for RGB channel balance */
+input[type="range"].range-red::-webkit-slider-thumb {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+input[type="range"].range-red::-webkit-slider-thumb:hover {
+  background-color: #f87171;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+}
+input[type="range"].range-red::-moz-range-thumb {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+input[type="range"].range-red::-moz-range-thumb:hover {
+  background-color: #f87171;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+}
+
+input[type="range"].range-green::-webkit-slider-thumb {
+  background-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+input[type="range"].range-green::-webkit-slider-thumb:hover {
+  background-color: #34d399;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
+}
+input[type="range"].range-green::-moz-range-thumb {
+  background-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+input[type="range"].range-green::-moz-range-thumb:hover {
+  background-color: #34d399;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
+}
+
+input[type="range"].range-blue::-webkit-slider-thumb {
+  background-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+input[type="range"].range-blue::-webkit-slider-thumb:hover {
+  background-color: #60a5fa;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+}
+input[type="range"].range-blue::-moz-range-thumb {
+  background-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+input[type="range"].range-blue::-moz-range-thumb:hover {
+  background-color: #60a5fa;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
 }

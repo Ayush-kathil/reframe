@@ -115,7 +115,7 @@ export default function AudioSpeedControl({ recipe, onChange }: Props) {
           onChange={(e) => onChange({ speed: SPEED_STEPS[Number(e.target.value)] })}
           aria-label="Video playback speed"
           aria-valuetext={`${recipe.speed}x speed, ${getSpeedDescription(recipe.speed)}`}
-          className="w-full h-11 accent-film-600 cursor-pointer"
+          className="w-full cursor-pointer py-3"
         />
         <div className="flex justify-between mt-1">
           {SPEED_STEPS.map((s) => (

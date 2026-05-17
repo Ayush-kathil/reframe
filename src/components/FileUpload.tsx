@@ -90,7 +90,7 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-text truncate">
+        <p className="text-sm font-medium text-text truncate">
           {currentFile?.name}
         </p>
 
@@ -105,7 +105,7 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="text-xs font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wider font-mono flex flex-col items-end gap-0.5"
+        className="text-xs font-medium text-accent hover:text-accent-hover transition-colors uppercase tracking-wider font-mono flex flex-col items-end gap-0.5"
       >
         <span>Change</span>
         <span className="text-[9px] text-muted font-normal lowercase">(Ctrl+O)</span>
@@ -142,7 +142,7 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
         }
       }}
       className={cn(
-        "group flex flex-col items-center justify-center gap-5 py-14 px-6 relative overflow-hidden",
+        "group flex flex-col items-center justify-center gap-5 py-14 px-6 relative overflow-hidden animate-fade-in",
         "border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-500 ease-out",
         dragging
           ? "border-accent bg-accent/5 scale-[1.02] shadow-[0_15px_40px_-10px_rgba(168,85,247,0.15)]"
@@ -166,12 +166,12 @@ export default function FileUpload({ onFileSelect, currentFile }: Props) {
       </div>
 
       <div className="text-center relative z-10">
-        <p className="font-heading font-extrabold text-sm text-text uppercase tracking-wider group-hover:text-accent transition-colors">
+        <p className="font-heading font-medium text-sm text-text uppercase tracking-wider group-hover:text-accent transition-colors">
           {dragging ? "Release to upload" : "Drag & Drop your video"}
         </p>
 
         <p className="text-xs text-muted mt-1.5 font-sans">
-          or <span className="text-accent font-semibold underline group-hover:text-accent-hover transition-colors">click to browse local files</span>
+          or <span className="text-accent font-medium underline group-hover:text-accent-hover transition-colors">click to browse local files</span>
         </p>
 
         <p className="text-[10px] text-muted/60 mt-3 font-mono border border-border/40 px-2 py-0.5 rounded bg-bg/50 inline-block">

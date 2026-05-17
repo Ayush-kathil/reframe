@@ -39,7 +39,7 @@ export default function ExportSettings({ recipe, onChange }: Props) {
         onChange={(e) => onChange({ quality: Number(e.target.value) })}
         aria-label="Video export quality (CRF)"
         aria-valuetext={`${label} quality, CRF value ${recipe.quality}`}
-        className="w-full accent-film-600 cursor-pointer"
+        className="w-full cursor-pointer py-2"
       />
       <div className="flex justify-between mt-1">
         <span className="text-[10px] text-[var(--muted)]">Best quality</span>

@@ -41,7 +41,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Col 1: Core Color Adjustments & RGB Channels */}
       <div className="space-y-6">
         {/* Core Adjustments */}
@@ -74,7 +74,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.brightness}
                 onChange={(e) => onChange({ brightness: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -91,7 +91,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.contrast}
                 onChange={(e) => onChange({ contrast: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.saturation}
                 onChange={(e) => onChange({ saturation: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -125,7 +125,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="1"
                 value={recipe.hueRotate}
                 onChange={(e) => onChange({ hueRotate: parseInt(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -142,7 +142,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.opacity}
                 onChange={(e) => onChange({ opacity: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.01"
                 value={recipe.colorBalanceR}
                 onChange={(e) => onChange({ colorBalanceR: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-red-500"
+                className="w-full cursor-pointer range-red"
               />
             </div>
 
@@ -195,7 +195,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.01"
                 value={recipe.colorBalanceG}
                 onChange={(e) => onChange({ colorBalanceG: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-green-500"
+                className="w-full cursor-pointer range-green"
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.01"
                 value={recipe.colorBalanceB}
                 onChange={(e) => onChange({ colorBalanceB: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-blue-500"
+                className="w-full cursor-pointer range-blue"
               />
             </div>
           </div>
@@ -251,7 +251,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.grayscale}
                 onChange={(e) => onChange({ grayscale: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -268,7 +268,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.05"
                 value={recipe.sepia}
                 onChange={(e) => onChange({ sepia: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -285,7 +285,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="1"
                 value={recipe.blur}
                 onChange={(e) => onChange({ blur: parseInt(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -302,7 +302,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.1"
                 value={recipe.sharpen}
                 onChange={(e) => onChange({ sharpen: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -319,7 +319,7 @@ export default function ColorGradingPanel({ recipe, onChange }: ColorGradingPane
                 step="0.1"
                 value={recipe.vignette}
                 onChange={(e) => onChange({ vignette: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-bg border border-border rounded-lg appearance-none cursor-pointer accent-accent"
+                className="w-full cursor-pointer"
               />
             </div>
 

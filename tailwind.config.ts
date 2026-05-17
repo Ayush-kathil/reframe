@@ -30,7 +30,8 @@ const config: Config = {
         tertiary: "var(--tertiary)",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Roboto", "Google Sans Text", "sans-serif"],
+        heading: ["Plus Jakarta Sans", "Google Sans", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
     },

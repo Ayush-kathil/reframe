@@ -29,8 +29,8 @@ function RatioBox({ width, height, active }: { width: number; height: number; ac
   return (
     <div
       className={cn(
-        "border-2 flex-shrink-0 transition-colors",
-        active ? "border-film-600" : "border-[var(--muted)] opacity-60"
+        "border-2 flex-shrink-0 transition-colors rounded-sm",
+        active ? "border-accent" : "border-[var(--muted)] opacity-60"
       )}
       style={{ width: w, height: h }}
     />
@@ -43,35 +43,35 @@ export default function PresetSelector({ recipe, onChange }: Props) {
   const [aspectRatio, setAspectRatio] = useState<number>(16 / 9);
 
   const lockedRef = useRef(false);
-const aspectRatioRef = useRef(16 / 9);
+  const aspectRatioRef = useRef(16 / 9);
 
-console.log("PRESET SELECTOR LOADED");
+  console.log("PRESET SELECTOR LOADED");
   const handleToggleLock = useCallback(() => {
-  if (!lockedRef.current) {
-    const w = recipe.customWidth ?? 1920;
-    const h = recipe.customHeight ?? 1080;
-    const ratio = h !== 0 ? w / h : 16 / 9;
-    setAspectRatio(ratio);
-    aspectRatioRef.current = ratio;
-  }
-  setLocked((prev) => {
-    lockedRef.current = !prev;
-    return !prev;
-  });
-}, [recipe.customWidth, recipe.customHeight]);
+    if (!lockedRef.current) {
+      const w = recipe.customWidth ?? 1920;
+      const h = recipe.customHeight ?? 1080;
+      const ratio = h !== 0 ? w / h : 16 / 9;
+      setAspectRatio(ratio);
+      aspectRatioRef.current = ratio;
+    }
+    setLocked((prev) => {
+      lockedRef.current = !prev;
+      return !prev;
+    });
+  }, [recipe.customWidth, recipe.customHeight]);
 
   const handleWidthChange = useCallback((w: number) => {
-   console.log("locked:", lockedRef.current, "ratio:", aspectRatioRef.current);
-  const patch: Partial<EditRecipe> = { customWidth: w };
-  if (lockedRef.current) patch.customHeight = Math.round(w / aspectRatioRef.current);
-  onChange(patch);
-}, [onChange]);
+    console.log("locked:", lockedRef.current, "ratio:", aspectRatioRef.current);
+    const patch: Partial<EditRecipe> = { customWidth: w };
+    if (lockedRef.current) patch.customHeight = Math.round(w / aspectRatioRef.current);
+    onChange(patch);
+  }, [onChange]);
 
-const handleHeightChange = useCallback((h: number) => {
-  const patch: Partial<EditRecipe> = { customHeight: h };
-  if (lockedRef.current) patch.customWidth = Math.round(h * aspectRatioRef.current);
-  onChange(patch);
-}, [onChange]);
+  const handleHeightChange = useCallback((h: number) => {
+    const patch: Partial<EditRecipe> = { customHeight: h };
+    if (lockedRef.current) patch.customWidth = Math.round(h * aspectRatioRef.current);
+    onChange(patch);
+  }, [onChange]);
 
   return (
     <div className="space-y-3">
@@ -89,15 +89,15 @@ const handleHeightChange = useCallback((h: number) => {
               className={cn(
                 "min-h-[44px] min-w-[44px] flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all duration-150 cursor-pointer hover:scale-[1.02] active:scale-[0.98]",
                 active
-                  ? "border-film-500 bg-film-50"
-                  : "border-[var(--border)] bg-[var(--surface)] hover:border-film-300 hover:bg-film-50/30"
+                  ? "border-accent bg-accent/5"
+                  : "border-[var(--border)] bg-[var(--surface)] hover:border-accent/40 hover:bg-accent/[0.01]"
               )}
             >
               <RatioBox width={preset.width} height={preset.height} active={active} />
               <div className="min-w-0 flex-1 overflow-hidden">
                 <p className={cn(
                   "text-xs font-heading font-bold leading-tight whitespace-nowrap",
-                  active ? "text-film-700" : "text-[var(--text)]"
+                  active ? "text-accent" : "text-[var(--text)]"
                 )}>
                   {preset.label}
                 </p>
@@ -118,21 +118,21 @@ const handleHeightChange = useCallback((h: number) => {
           className={cn(
             "min-h-[44px] min-w-[44px] flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all duration-150 cursor-pointer hover:scale-[1.02] active:scale-[0.98]",
             recipe.preset === "custom"
-              ? "border-film-500 bg-film-50"
-              : "border-[var(--border)] bg-[var(--surface)] hover:border-film-300 hover:bg-film-50/30"
+              ? "border-accent bg-accent/5"
+              : "border-[var(--border)] bg-[var(--surface)] hover:border-accent/40 hover:bg-accent/[0.01]"
           )}
         >
           <Settings2
             size={20}
             className={cn(
               "shrink-0",
-              recipe.preset === "custom" ? "text-film-600" : "text-[var(--muted)]"
+              recipe.preset === "custom" ? "text-accent" : "text-[var(--muted)]"
             )}
           />
           <div className="min-w-0">
             <p className={cn(
               "text-xs font-heading font-bold",
-              recipe.preset === "custom" ? "text-film-700" : "text-[var(--text)]"
+              recipe.preset === "custom" ? "text-accent" : "text-[var(--text)]"
             )}>
               Custom
             </p>
@@ -156,7 +156,7 @@ const handleHeightChange = useCallback((h: number) => {
               value={recipe.customWidth}
               
               onChange={(e) => handleWidthChange(Number(e.target.value))}
-              className="w-full text-sm px-3 py-1.5 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-film-400 transition-shadow"
+              className="w-full text-sm px-3 py-1.5 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-accent/40 transition-shadow"
             />
             {recipe.customWidth % 2!==0 && (
               <p className="text-[10px] text-amber-500 mt-1">
@@ -172,8 +172,8 @@ const handleHeightChange = useCallback((h: number) => {
             className={cn(
               "mt-5 p-1.5 rounded-md border transition-colors cursor-pointer",
               locked
-                ? "border-film-500 bg-film-50 text-film-600"
-                : "border-[var(--border)] text-[var(--muted)] hover:border-film-300 hover:text-film-500"
+                ? "border-accent bg-accent/5 text-accent"
+                : "border-[var(--border)] text-[var(--muted)] hover:border-accent/40 hover:text-accent"
             )}
           >
             {locked ? <Lock size={14} /> : <Unlock size={14} />}
@@ -191,7 +191,7 @@ const handleHeightChange = useCallback((h: number) => {
               step={2}
               value={recipe.customHeight}
               onChange={(e) => handleHeightChange(Number(e.target.value))}
-              className="w-full text-sm px-3 py-1.5 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-film-400 transition-shadow"
+              className="w-full text-sm px-3 py-1.5 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-accent/40 transition-shadow"
             />
             {recipe.customHeight %2!==0 && (
               <p className="text-[10px] text-amber-500 mt-1">

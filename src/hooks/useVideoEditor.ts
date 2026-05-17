@@ -61,6 +61,7 @@ export function useVideoEditor() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ExportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const exportAbortControllerRef = useRef<AbortController | null>(null);
   const exportCancelledRef = useRef(false);
 
@@ -73,40 +74,45 @@ export function useVideoEditor() {
     setStatus("idle");
     setError(null);
     setFile(null);
-
-    // LAYER 1: Extension check
-    const validExtensions = ['.mp4', '.mov', '.avi', '.webm', '.mkv'];
-    const filename = selectedFile.name.toLowerCase();
-    const hasValidExtension = validExtensions.some(ext => filename.endsWith(ext));
-    if (!hasValidExtension) {
-      setError(`Layer 1 Validation Failed: Invalid file extension. Expected one of: ${validExtensions.join(', ')}`);
-      setStatus("error");
-      return;
-    }
-
-    // LAYER 2: MIME type check
-    if (!selectedFile.type.startsWith("video/")) {
-      setError(`Layer 2 Validation Failed: Invalid MIME type. Expected video/*, got ${selectedFile.type || 'unknown'}`);
-      setStatus("error");
-      return;
-    }
-
-    // LAYER 3: Magic Bytes Verification
-    const isVideo = await verifyMagicBytes(selectedFile);
-    if (!isVideo) {
-      setError("Layer 3 Validation Failed: Invalid file content. The file's magic bytes do not match known video formats.");
-      setStatus("error");
-      return;
-    }
+    setIsValidating(true);
 
     try {
-      const { duration: dur } = await extractMetadata(selectedFile);
-      setDuration(dur);
-      setFile(selectedFile);
-      setRecipe((prev) => ({ ...prev, trimStart: 0, trimEnd: null }));
-    } catch (err) {
-      setError(`Layer 4 Validation Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
-      setStatus("error");
+      // LAYER 1: Extension check
+      const validExtensions = ['.mp4', '.mov', '.avi', '.webm', '.mkv'];
+      const filename = selectedFile.name.toLowerCase();
+      const hasValidExtension = validExtensions.some(ext => filename.endsWith(ext));
+      if (!hasValidExtension) {
+        setError(`Layer 1 Validation Failed: Invalid file extension. Expected one of: ${validExtensions.join(', ')}`);
+        setStatus("error");
+        return;
+      }
+
+      // LAYER 2: MIME type check
+      if (!selectedFile.type.startsWith("video/")) {
+        setError(`Layer 2 Validation Failed: Invalid MIME type. Expected video/*, got ${selectedFile.type || 'unknown'}`);
+        setStatus("error");
+        return;
+      }
+
+      // LAYER 3: Magic Bytes Verification
+      const isVideo = await verifyMagicBytes(selectedFile);
+      if (!isVideo) {
+        setError("Layer 3 Validation Failed: Invalid file content. The file's magic bytes do not match known video formats.");
+        setStatus("error");
+        return;
+      }
+
+      try {
+        const { duration: dur } = await extractMetadata(selectedFile);
+        setDuration(dur);
+        setFile(selectedFile);
+        setRecipe((prev) => ({ ...prev, trimStart: 0, trimEnd: null }));
+      } catch (err) {
+        setError(`Layer 4 Validation Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+        setStatus("error");
+      }
+    } finally {
+      setIsValidating(false);
     }
   }, []);
 
@@ -244,6 +250,7 @@ export function useVideoEditor() {
     progress,
     result,
     error,
+    isValidating,
     updateRecipe,
     handleFileSelect,
     handleExport,

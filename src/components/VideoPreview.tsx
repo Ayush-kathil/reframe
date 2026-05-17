@@ -99,13 +99,53 @@ export default function VideoPreview({ file, recipe, playing, onTimeUpdate, onDu
     `brightness(${1 + recipe.brightness})`,
     `contrast(${recipe.contrast})`,
     `saturate(${recipe.saturation})`,
-  ].join(" ");
+    `grayscale(${recipe.grayscale})`,
+    `sepia(${recipe.sepia})`,
+    `blur(${recipe.blur}px)`,
+    `hue-rotate(${recipe.hueRotate}deg)`,
+    `opacity(${recipe.opacity})`,
+    recipe.invert ? "invert(1)" : "",
+    recipe.sharpen > 0 ? "url(#sharpen-filter)" : "",
+    (recipe.colorBalanceR !== 1 || recipe.colorBalanceG !== 1 || recipe.colorBalanceB !== 1) ? "url(#color-balance-filter)" : "",
+  ].filter(Boolean).join(" ");
 
-  // Handle rotation transform
-  const transform = `rotate(${recipe.rotate}deg)`;
+  // Handle rotation & flip transform
+  const transform = [
+    `rotate(${recipe.rotate}deg)`,
+    recipe.flipH ? "scaleX(-1)" : "",
+    recipe.flipV ? "scaleY(-1)" : "",
+  ].filter(Boolean).join(" ");
 
   return (
-    <div className="relative w-full flex flex-col items-center gap-4">
+    <div className="relative w-full flex flex-col items-center gap-4 animate-fade-in">
+      {/* SVG Filters for Live Preview (Sharpening & RGB Color Balance) */}
+      <svg className="absolute w-0 h-0 pointer-events-none" style={{ position: "absolute", width: 0, height: 0 }}>
+        <defs>
+          {recipe.sharpen > 0 && (
+            <filter id="sharpen-filter">
+              <feConvolveMatrix
+                order="3"
+                preserveAlpha="true"
+                kernelMatrix={`0 -${recipe.sharpen} 0 -${recipe.sharpen} ${1 + 4 * recipe.sharpen} -${recipe.sharpen} 0 -${recipe.sharpen} 0`}
+              />
+            </filter>
+          )}
+          {(recipe.colorBalanceR !== 1 || recipe.colorBalanceG !== 1 || recipe.colorBalanceB !== 1) && (
+            <filter id="color-balance-filter">
+              <feColorMatrix
+                type="matrix"
+                values={`
+                  ${recipe.colorBalanceR} 0 0 0 0
+                  0 ${recipe.colorBalanceG} 0 0 0
+                  0 0 ${recipe.colorBalanceB} 0 0
+                  0 0 0 1 0
+                `}
+              />
+            </filter>
+          )}
+        </defs>
+      </svg>
+
       <div 
         className="relative w-full rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm border border-[var(--border)] shadow-2xl transition-all duration-500 ease-out flex items-center justify-center"
         style={{ 
@@ -119,7 +159,7 @@ export default function VideoPreview({ file, recipe, playing, onTimeUpdate, onDu
             className="absolute inset-0 animate-pulse bg-gray-800/50 flex items-center justify-center"
             aria-label="Loading video preview"
           >
-            <div className="w-8 h-8 border-4 border-film-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
           </div>
         )}
         
