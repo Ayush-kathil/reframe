@@ -14,6 +14,7 @@ interface ExportPanelProps {
   progress: number;
   result: ExportResult | null;
   error: string | null;
+  file: File | null;
   onExport: () => void;
   onCancel: () => void;
   onReset: () => void;
@@ -26,6 +27,7 @@ export default function ExportPanel({
   progress,
   result,
   error,
+  file,
   onExport,
   onCancel,
   onReset,
@@ -37,7 +39,7 @@ export default function ExportPanel({
     const logs = [
       "[lumina-wasm] Engine initialised successfully.",
       `[encoder] Initialising libx264 pipeline: CRF ${recipe.quality}`,
-      `[muxer] Dynamic audio Speed factor: ${recipe.speed}x`,
+      `[muxer] Dynamic audio speed factor: ${recipe.speed}x`,
       `[composer] Processing container: ${recipe.format.toUpperCase()}`,
     ];
 
@@ -57,11 +59,11 @@ export default function ExportPanel({
   const isProcessing = status === "loading-engine" || status === "exporting";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-6 animate-fade-in">
+    <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-6 animate-fade-in relative">
       {/* Col 1: Config Settings */}
       <div className="space-y-6">
         <div className="bg-surface border border-border rounded-xl p-5 space-y-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted font-mono flex items-center gap-1.5 border-b border-border pb-3">
+          <h3 className="text-xs font-medium uppercase tracking-widest text-muted font-mono flex items-center gap-1.5 border-b border-border pb-3">
             <Zap className="w-3.5 h-3.5" />
             Config settings
           </h3>
@@ -80,24 +82,45 @@ export default function ExportPanel({
             </div>
           </div>
 
-          <div className="border-t border-border pt-4">
+          <div className="border-t border-border pt-4 space-y-3">
             {status === "done" && result ? (
               <div className="p-3 bg-secondary/10 border border-secondary/20 rounded-xl text-center text-xs text-secondary font-mono">
                 ✓ Render Completed Successfully
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={onExport}
-                disabled={isProcessing}
-                className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-heading text-base font-bold uppercase tracking-wider transition-all duration-200 ${
-                  isProcessing
-                    ? "bg-border text-muted cursor-not-allowed opacity-40 animate-pulse"
-                    : "bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/15 active:scale-95 cursor-pointer"
-                }`}
-              >
-                {isProcessing ? "PROCESSING RENDER" : "LAUNCH EXPORT"}
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={onExport}
+                  disabled={isProcessing}
+                  className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-heading text-base font-medium uppercase tracking-wider transition-all duration-200 ${
+                    isProcessing
+                      ? "bg-border text-muted cursor-not-allowed opacity-40 animate-pulse"
+                      : "bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/15 active:scale-95 cursor-pointer"
+                  }`}
+                >
+                  {isProcessing ? "PROCESSING RENDER" : "LAUNCH EXPORT"}
+                </button>
+
+                {file && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = URL.createObjectURL(file);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `Draft_${file.name}`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 text-secondary hover:text-secondary-hover rounded-xl font-heading text-xs font-medium uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
+                  >
+                    Instant Download (Super Fast Draft)
+                  </button>
+                )}
+              </div>
             )}
 
             {isProcessing && (
@@ -123,7 +146,7 @@ export default function ExportPanel({
         ) : (
           /* Render Progress Board */
           <div className="bg-surface border border-border rounded-xl p-5 space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted font-mono flex items-center gap-1.5 border-b border-border pb-3">
+            <h3 className="text-xs font-medium uppercase tracking-widest text-muted font-mono flex items-center gap-1.5 border-b border-border pb-3">
               <Play className="w-3.5 h-3.5" />
               Compile progress
             </h3>
@@ -171,7 +194,7 @@ export default function ExportPanel({
         {/* Live Engine Console Terminal */}
         <div className="bg-[#0e0e0e] border border-border rounded-xl p-5 space-y-4">
           <div className="flex justify-between items-center border-b border-border pb-3">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted font-mono flex items-center gap-1.5">
+            <h4 className="text-[10px] font-medium uppercase tracking-widest text-muted font-mono flex items-center gap-1.5">
               <Terminal className="w-3.5 h-3.5 text-accent" />
               Engine Console Log
             </h4>
@@ -195,6 +218,72 @@ export default function ExportPanel({
           )}
         </div>
       </div>
+
+      {/* ── Clipchamp-style Centered Export Modal Overlay ── */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface border border-border/80 w-full max-w-md rounded-2xl p-6 space-y-6 shadow-2xl relative overflow-hidden text-left">
+            {/* Ambient Background Radial Glow */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="text-center space-y-2 relative z-10">
+              <h3 className="font-heading font-medium text-lg text-text">Exporting video composition</h3>
+              <p className="text-xs text-muted font-sans max-w-xs mx-auto">
+                Lumina Cut is encoding and packaging your video inside your browser using hardware acceleration.
+              </p>
+            </div>
+
+            {/* Premium Circular Progress Tracker */}
+            <div className="relative z-10 flex flex-col items-center justify-center py-6">
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <svg className="absolute w-full h-full -rotate-90">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="54"
+                    className="stroke-bg fill-none"
+                    strokeWidth="8"
+                  />
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="54"
+                    className="stroke-accent fill-none transition-all duration-300 ease-out"
+                    strokeWidth="8"
+                    strokeDasharray={2 * Math.PI * 54}
+                    strokeDashoffset={2 * Math.PI * 54 * (1 - progress / 100)}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="text-center">
+                  <div className="text-2xl font-bold font-mono text-text">{progress}%</div>
+                  <div className="text-[9px] uppercase tracking-wider text-muted font-mono mt-0.5">
+                    {status === "loading-engine" ? "Booting" : "Encoding"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Estimated time or current stream stage */}
+            <div className="relative z-10 text-[10px] font-mono text-muted bg-bg/50 border border-border/40 py-2.5 px-4 rounded-xl">
+              {status === "loading-engine"
+                ? "➜ Initializing browser WASM sandbox..."
+                : "➜ Muxing streams into container..."}
+            </div>
+
+            <div className="relative z-10 flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 py-3 border border-border hover:bg-bg text-muted hover:text-text rounded-xl font-heading text-xs font-medium uppercase tracking-wider transition-all cursor-pointer text-center"
+              >
+                Cancel Export
+              </button>
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 }
