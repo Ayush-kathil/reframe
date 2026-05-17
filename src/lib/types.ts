@@ -14,6 +14,25 @@ export interface EditRecipe {
   brightness: number;
   contrast: number;
   saturation: number;
+  hueRotate: number;
+  sepia: number;
+  grayscale: number;
+  blur: number;
+  opacity: number;
+  invert: boolean;
+  sharpen: number;
+  noise: number;
+  vignette: number;
+  colorBalanceR: number;
+  colorBalanceG: number;
+  colorBalanceB: number;
+  flipH: boolean;
+  flipV: boolean;
+  volume: number;
+  text?: string;
+  textPosition?: "top" | "center" | "bottom";
+  textFontSize?: number;
+  textColor?: string;
 }
 
 export interface ExportResult {
@@ -48,6 +67,25 @@ export const DEFAULT_RECIPE: EditRecipe = {
   brightness: 0,
   contrast: 1,
   saturation: 1,
+  hueRotate: 0,
+  sepia: 0,
+  grayscale: 0,
+  blur: 0,
+  opacity: 1,
+  invert: false,
+  sharpen: 0,
+  noise: 0,
+  vignette: 0,
+  colorBalanceR: 1,
+  colorBalanceG: 1,
+  colorBalanceB: 1,
+  flipH: false,
+  flipV: false,
+  volume: 1,
+  text: "",
+  textPosition: "center",
+  textFontSize: 48,
+  textColor: "#ffffff",
 };
 
 export const MAX_FILE_SIZE =

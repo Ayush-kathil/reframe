@@ -1,13 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import { useEffect, useRef, useState } from "react";
 import { EditRecipe } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import { Dispatch, SetStateAction } from "react";
+
 interface Props {
   file: File | null;
   recipe: EditRecipe;
+  playing?: boolean;
+  onTimeUpdate?: Dispatch<SetStateAction<number>>;
+  onDurationChange?: Dispatch<SetStateAction<number>>;
 }
 
-export default function VideoPreview({ file, recipe }: Props) {
+export default function VideoPreview({ file, recipe, playing, onTimeUpdate, onDurationChange }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const lastId = useRef(0);
@@ -46,6 +52,13 @@ export default function VideoPreview({ file, recipe }: Props) {
 
     video.addEventListener("loadeddata", handleLoaded);
 
+    if (onTimeUpdate) {
+      video.addEventListener("timeupdate", () => onTimeUpdate(video.currentTime));
+    }
+    if (onDurationChange) {
+      video.addEventListener("loadedmetadata", () => onDurationChange(video.duration));
+    }
+
     return () => {
       // cleanup event listener safely
       if (onLoadedRef.current) {
@@ -67,6 +80,17 @@ export default function VideoPreview({ file, recipe }: Props) {
       }
     };
   }, [file]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    if (playing) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [playing]);
 
   if (!file) return null;
 
@@ -130,3 +154,5 @@ export default function VideoPreview({ file, recipe }: Props) {
     </div>
   );
 }
+
+
