@@ -722,7 +722,6 @@ export default function VideoEditor() {
                               progress={progress}
                               result={result}
                               error={error}
-                              file={file}
                               onExport={handleExport}
                               onCancel={cancelExport}
                               onReset={reset}

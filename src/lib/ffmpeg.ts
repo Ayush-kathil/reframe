@@ -183,7 +183,8 @@ export async function exportVideo(
   file: File,
   recipe: EditRecipe,
   onProgress: (percent: number) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  fastMode?: boolean
 ): Promise<ExportResult> {
   const sessionId = buildSessionId();
   let targetW: number, targetH: number;
@@ -225,6 +226,51 @@ export async function exportVideo(
     await ffmpeg.writeFile(inputName, await fetchFile(file), { signal });
 
     ffmpeg.on("progress", handleProgress);
+
+    if (fastMode) {
+      const args = [];
+      
+      // Fast trim seeking
+      if (recipe.trimStart > 0) {
+        args.push("-ss", String(recipe.trimStart));
+      }
+      
+      args.push("-i", inputName);
+      
+      if (recipe.trimEnd !== null) {
+        args.push("-to", String(recipe.trimEnd));
+      }
+
+      // Check if container format matches source file extension to copy streams
+      const sourceExt = file.name.split(".").pop()?.toLowerCase();
+      if (sourceExt === recipe.format && recipe.keepAudio) {
+        args.push("-c", "copy");
+      } else {
+        // Stream copying might fail across different containers, transcode with ultrafast preset instead
+        args.push("-c:v", "libx264", "-preset", "ultrafast", "-crf", "23");
+        if (recipe.keepAudio) {
+          args.push("-c:a", "aac");
+        } else {
+          args.push("-an");
+        }
+      }
+      
+      args.push(outputName);
+
+      const exitCode = await ffmpeg.exec(args, undefined, { signal });
+      if (exitCode === 0) {
+        const data = await ffmpeg.readFile(outputName, undefined, { signal });
+        const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: mimeType });
+        onProgress(100);
+        return {
+          blobUrl: URL.createObjectURL(blob),
+          size: blob.size,
+          width: targetW,
+          height: targetH,
+          format: recipe.format as "mp4" | "webm" | "mkv",
+        };
+      }
+    }
 
     const vf = buildVideoFilter(recipe, targetW, targetH);
     const audioTrim = buildAudioTrimFilter(recipe);

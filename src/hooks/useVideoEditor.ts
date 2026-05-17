@@ -116,7 +116,7 @@ export function useVideoEditor() {
     }
   }, []);
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (fastMode = false) => {
     if (!file) return;
     if (status === "loading-engine" || status === "exporting") {
       return;
@@ -143,7 +143,8 @@ export function useVideoEditor() {
         file,
         recipe,
         setProgress,
-        abortController.signal
+        abortController.signal,
+        fastMode
       );
       if (exportCancelledRef.current) return;
 
