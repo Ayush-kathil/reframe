@@ -131,13 +131,34 @@ function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number):
   return filters.join(",");
 }
 
-function buildAudioFilter(recipe: EditRecipe): string {
+export function buildAudioFilter(recipe: EditRecipe): string {
   const filters: string[] = [];
   
   if (recipe.speed !== 1) {
-    if (recipe.speed === 0.25) filters.push("atempo=0.5,atempo=0.5");
-    else if (recipe.speed === 4) filters.push("atempo=2.0,atempo=2.0");
-    else filters.push(`atempo=${recipe.speed}`);
+    let currentSpeed = recipe.speed;
+    const speedFilters: string[] = [];
+    
+    if (currentSpeed < 0.5) {
+      while (currentSpeed < 0.5) {
+        speedFilters.push("atempo=0.5");
+        currentSpeed = currentSpeed / 0.5;
+      }
+      if (currentSpeed !== 1) {
+        speedFilters.push(`atempo=${Number(currentSpeed.toFixed(4))}`);
+      }
+    } else if (currentSpeed > 2.0) {
+      while (currentSpeed > 2.0) {
+        speedFilters.push("atempo=2.0");
+        currentSpeed = currentSpeed / 2.0;
+      }
+      if (currentSpeed !== 1) {
+        speedFilters.push(`atempo=${Number(currentSpeed.toFixed(4))}`);
+      }
+    } else {
+      speedFilters.push(`atempo=${Number(currentSpeed.toFixed(4))}`);
+    }
+    
+    filters.push(speedFilters.join(","));
   }
 
   if (recipe.volume !== 1) {
