@@ -2,48 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Light mode tokens ── */
+/* ── Light Mode / Cinematic Cream ── */
 :root {
-  --bg: #F7F4F0;
-  --surface: #ffffff;
-  --border: #E8E3DC;
-  --text: #181412;
-  --muted: #5C5550;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --film-600: #e63946;
-  --film-400: #ff6b6b;
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --border: #E6E1DA;
+  --text: #1B1816;
+  --muted: #7E746D;
+  --accent: #8E2DE2;
+  --accent-hover: #6C1FB8;
+  --secondary: #0D9488;
+  --secondary-hover: #0F766E;
+  --tertiary: #1D4ED8;
+  --shadow: rgba(27, 24, 22, 0.04);
 }
 
-/* ── Dark mode tokens ── */
+/* ── Dark Mode / Premium Cinematic Charcoal ── */
 .dark {
-  --bg: #0f172a;
-  --surface: #1e293b;
-  --border: #334155;
-  --text: #f1f5f9;
-  --muted: #94a3b8;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg: #131313;
+  --surface: #1E1E1E;
+  --border: #2A2A2A;
+  --text: #E5E2E1;
+  --muted: #988D9F;
+  --accent: #A855F7;
+  --accent-hover: #B76DFF;
+  --secondary: #2DD4BF;
+  --secondary-hover: #3CDDC7;
+  --tertiary: #3B82F6;
+  --shadow: rgba(0, 0, 0, 0.4);
 }
 
-/* ── Base styles ── */
-body {
-  background-color: var(--bg);
-  color: var(--text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* ── Custom Utilities & Premium Scrollbars ── */
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Custom Numeric Typography */
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Smooth Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
 }
 
-/* Smooth transitions for all themed elements */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: ease;
-  transition-duration: 200ms;
+/* ── Micro-Animations & Interactivity ── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Form Controls and Focus Rings */
 :focus-visible {
-  outline: 2px solid #e63946;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+}
+
+/* Glassmorphism effects */
+.glass-panel {
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
 }

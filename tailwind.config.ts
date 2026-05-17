@@ -14,8 +14,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        bg: "var(--bg)",
+        surface: "var(--surface)",
+        border: "var(--border)",
+        text: "var(--text)",
+        muted: "var(--muted)",
+        accent: {
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          hover: "var(--secondary-hover)",
+        },
+        tertiary: "var(--tertiary)",
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
     },
   },
