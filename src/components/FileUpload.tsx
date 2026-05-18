@@ -139,23 +139,31 @@ export default function FileUpload({
         </div>
       </div>
 
-      <div className="
-        flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:shrink-0
-        lg:border-l lg:border-[var(--border)] lg:pl-4
-      ">
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="whitespace-nowrap text-xs font-semibold text-film-600 hover:text-film-700 uppercase tracking-wide transition-colors duration-150"
-        >
-          Change
-          <span className="text-[var(--muted)] ml-1 normal-case font-normal">(Ctrl+O)</span>
-        </button>
-        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-heading font-medium text-[var(--muted)] whitespace-nowrap">
-          <FolderOpen size={14} />
-          MP4 / MOV / AVI / WebM
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="text-xs font-semibold text-film-600 hover:text-film-700 uppercase tracking-wide"
+      >
+        Change
+        <span className="text-[var(--muted)] ml-1">(Ctrl+O)</span>
+      </button>
+
+
+      {fileError && (
+        <p className="text-xs text-red-500 mt-2 font-medium">
+          {fileError}
+        </p>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleFile(f);
+        }}
+      />
     </div>
 
     <p className="text-xs text-gray-500 mt-3 break-words">
