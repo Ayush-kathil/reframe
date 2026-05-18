@@ -15,6 +15,7 @@ import FormatSelector from "./FormatSelector";
 import ExportSettings from "./ExportSettings";
 import ExportOverlay from "./ExportOverlay";
 import DownloadResult from "./DownloadResult";
+import ImageOverlay from "./ImageOverlay"
 import { cn } from "@/lib/utils";
 import {
   Layers, Crop, Scissors, RotateCw, Volume2,
@@ -48,11 +49,15 @@ function Section({ icon, title, children, delay = 0 }: SectionProps) {
 
 export default function VideoEditor() {
   const {
-    file, duration, recipe, status, progress,
+   file, duration, recipe, status, progress,
     result, error, updateRecipe,
     handleFileSelect, fileError, handleExport, cancelExport, reset, resetSettings,
     videoRef,
     seekTo,
+    overlayFile, setOverlayFile,
+    overlayPosition, setOverlayPosition,
+    overlaySize, setOverlaySize,
+    overlayOpacity, setOverlayOpacity,
   } = useVideoEditor();
   const [copied, setCopied] = useState(false);
   const downloadRef = useRef<HTMLDivElement>(null);
@@ -142,7 +147,7 @@ export default function VideoEditor() {
               <p className="text-[var(--warning)] text-sm">
                 ⚠️ Large file - processing may take several minutes
               </p>
-            )}      
+            )}
             {file && (
               <div className={cn(
                 "grid grid-cols-1 sm:grid-cols-2 gap-4",
@@ -245,6 +250,18 @@ export default function VideoEditor() {
                   </Section>
                   <Section icon={<SlidersHorizontal size={12} />} title="Export quality" delay={200}>
                     <ExportSettings recipe={recipe} onChange={updateRecipe} />
+                  </Section>
+                  <Section icon={<Layers size={12} />} title="Image overlay" delay={120}>
+                    <ImageOverlay
+                      overlayFile={overlayFile}
+                      setOverlayFile={setOverlayFile}
+                      overlayPosition={overlayPosition}
+                      setOverlayPosition={setOverlayPosition}
+                      overlaySize={overlaySize}
+                      setOverlaySize={setOverlaySize}
+                      overlayOpacity={overlayOpacity}
+                      setOverlayOpacity={setOverlayOpacity}
+                    />
                   </Section>
                 </div>
               </div>

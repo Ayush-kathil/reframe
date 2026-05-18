@@ -1,14 +1,29 @@
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { EditRecipe, ExportResult } from "./types";
+import { fetchFile } from "@ffmpeg/util";
+import { EditRecipe, ExportResult, BackgroundMusicOptions, ImageOverlayOptions } from "./types";
 import { getPresetById } from "./presets";
 import { simd } from "wasm-feature-detect";
 
-const CORE_VERSION = "0.12.10";
-const JSDELIVR_BASE = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/umd`;
-const UNPKG_BASE = `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/umd`;
+const CORE_BASE_URL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
 
-let ffmpegInstance: FFmpeg | null = null;
+const SRI_HASHES: Record<string, string> = {
+  "ffmpeg-core.js":   "sha384-sKfkiFtvUk+vexk+0EUhEh366190/4WpgUAsUvaxEfyg7+E1Zt5Y5hrsU808g8Q9",
+  "ffmpeg-core.wasm": "sha384-U1VDhkPYrM3wTCT4/vjSpSsKqG/UjljYrYCI4hBSJ02svbCkxuCi6U6u/peg5vpW",
+};
+
+async function fetchWithIntegrity(url: string, mimeType: string): Promise<string> {
+  const key = url.split("/").pop()!;
+  const integrity = SRI_HASHES[key];
+
+  if (!integrity) {
+    throw new Error(`[SRI] No hash found for: ${key}`);
+  }
+
+  const res = await fetch(url, { integrity, credentials: "omit" });
+  const blob = new Blob([await res.arrayBuffer()], { type: mimeType });
+  return URL.createObjectURL(blob);
+}
+
+let ffmpegInstance: import("@ffmpeg/ffmpeg").FFmpeg | null = null;
 
 export class FFmpegLoadError extends Error {
   constructor(message: string) {
@@ -16,65 +31,49 @@ export class FFmpegLoadError extends Error {
     this.name = "FFmpegLoadError";
   }
 }
-async function tryLoad(ffmpeg: FFmpeg, baseUrl: string, isSimd: boolean, signal?: AbortSignal) {
-  const coreName = isSimd ? "ffmpeg-core-simd" : "ffmpeg-core";
-  
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseUrl}/${coreName}.js`, "text/javascript"),
-    wasmURL: await toBlobURL(`${baseUrl}/${coreName}.wasm`, "application/wasm"),
-  }, { signal });
-}
 
 export async function loadFFmpeg(
-  signal?: AbortSignal,
+  signal?: AbortSignal, 
   onProgress?: (percent: number) => void
-): Promise<FFmpeg> {
+): Promise<import("@ffmpeg/ffmpeg").FFmpeg> {
   if (ffmpegInstance?.loaded) {
     onProgress?.(100);
     return ffmpegInstance;
   }
 
+  const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const ffmpeg = ffmpegInstance ?? new FFmpeg();
   ffmpegInstance = ffmpeg;
 
-  // We'll try multiple loading strategies for maximum reliability
-  const strategies = [
-    { base: JSDELIVR_BASE, preferSimd: true },
-    { base: UNPKG_BASE, preferSimd: true },
-    { base: JSDELIVR_BASE, preferSimd: false },
-    { base: UNPKG_BASE, preferSimd: false },
-  ];
+  const handleProgress = ({ progress }: { progress: number }) => {
+    onProgress?.(Math.round(progress * 100));
+  };
 
-  let lastError: any = null;
+  try {
+    ffmpeg.on("progress", handleProgress);
 
-  for (const strategy of strategies) {
-    try {
-      const isSimdSupported = strategy.preferSimd ? await simd() : false;
-      await tryLoad(ffmpeg, strategy.base, isSimdSupported, signal);
-      console.log(`FFmpeg loaded successfully using ${strategy.base} (${isSimdSupported ? 'SIMD' : 'Standard'})`);
-      onProgress?.(100);
-      return ffmpeg;
-    } catch (err) {
-      lastError = err;
-      console.warn(`FFmpeg failed to load from ${strategy.base}. Retrying next strategy...`);
-      continue;
+    await ffmpeg.load({
+      coreURL: await fetchWithIntegrity(`${CORE_BASE_URL}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await fetchWithIntegrity(`${CORE_BASE_URL}/ffmpeg-core.wasm`, "application/wasm"),
+    }, { signal });
+
+    onProgress?.(100);
+    return ffmpeg;
+  } catch (err) {
+    if (ffmpegInstance === ffmpeg) {
+      ffmpegInstance = null;
     }
+    throw new FFmpegLoadError("Failed to load the FFmpeg engine. Check your internet connection.");
+  } finally {
+    ffmpeg.off("progress", handleProgress);
   }
-
-  ffmpegInstance = null;
-  throw new FFmpegLoadError(
-    "FFmpeg failed to initialize. This usually happens due to a network restriction or missing SharedArrayBuffer headers. " +
-    (lastError?.message || "")
-  );
 }
 
-/** Terminates the active FFmpeg instance and releases its memory. */
 export function terminateFFmpeg() {
   ffmpegInstance?.terminate();
   ffmpegInstance = null;
 }
 
-/** Generates a unique session ID used to isolate FFmpeg file names across concurrent exports. */
 function buildSessionId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -82,7 +81,6 @@ function buildSessionId(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-/** Builds the FFmpeg -vf filter chain string from the current recipe settings. */
 function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number): string {
   const filters: string[] = [];
 
@@ -100,7 +98,7 @@ function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number):
     filters.push("transpose=2");
   }
 
-  if (recipe.stabilization) {
+  if ((recipe as any).stabilization) {
     filters.push("deshake=x=-1:y=-1:w=-1:h=-1:rx=16:ry=16");
   }
 
@@ -121,7 +119,6 @@ function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number):
     filters.push(`setpts=${pts}*PTS`);
   }
 
-  // Color & Effects
   filters.push(`eq=brightness=${recipe.brightness}:contrast=${recipe.contrast}:saturation=${recipe.saturation}`);
   
   if (recipe.hueRotate !== 0) filters.push(`hue=h=${recipe.hueRotate}`);
@@ -144,7 +141,6 @@ function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number):
   return filters.join(",");
 }
 
-/** Builds an atempo filter chain for the given playback speed, chaining multiple filters for speeds outside the 0.5–2.0 range. */
 export function buildAudioFilter(recipe: EditRecipe): string {
   const filters: string[] = [];
   
@@ -188,12 +184,134 @@ function buildAudioTrimFilter(recipe: EditRecipe): string {
   return `atrim=start=${recipe.trimStart}:end=${end},asetpts=PTS-STARTPTS`;
 }
 
+function buildArguments(
+  recipe: EditRecipe,
+  format: "mp4" | "webm" | "mkv",
+  outputName: string,
+  inputName: string,
+  targetW: number,
+  targetH: number,
+  hasMusicTrack: boolean,
+  musicInputName: string,
+  musicOptions: BackgroundMusicOptions | undefined,
+  hasOverlay: boolean,
+  overlayInputName: string,
+  overlayOptions: ImageOverlayOptions | undefined,
+  hasOriginalAudio: boolean
+): string[] {
+  const vf = buildVideoFilter(recipe, targetW, targetH);
+  const audioTrim = hasOriginalAudio ? buildAudioTrimFilter(recipe) : "";
+  const audioSpeed = hasOriginalAudio ? buildAudioFilter(recipe) : "";
+  const afParts = [audioTrim, audioSpeed].filter(Boolean);
+  const af = afParts.join(",");
+
+  const musicIdx = 1;
+  const overlayIdx = hasMusicTrack ? 2 : 1;
+
+  const args: string[] = [];
+  args.push("-i", inputName);
+  if (hasMusicTrack) {
+    if (musicOptions!.loopMusic) args.push("-stream_loop", "-1");
+    args.push("-i", musicInputName);
+  }
+  if (hasOverlay) {
+    args.push("-i", overlayInputName);
+  }
+
+  const needsFilterComplex = hasOverlay || hasMusicTrack;
+  const shouldKeepAudio = recipe.keepAudio && (hasOriginalAudio || hasMusicTrack);
+
+  if (needsFilterComplex) {
+    const filterParts: string[] = [];
+    let videoOut = "[0:v]";
+
+    if (vf) {
+      filterParts.push(`[0:v]${vf}[vbase]`);
+      videoOut = "[vbase]";
+    }
+
+    if (hasOverlay) {
+      const scaledW = overlayOptions!.size;
+      const alpha = (overlayOptions!.opacity / 100).toFixed(2);
+      const posMap: Record<string, string> = {
+        "top-left":     "20:20",
+        "top-right":    "W-w-20:20",
+        "bottom-left":  "20:H-h-20",
+        "bottom-right": "W-w-20:H-h-20",
+      };
+      const pos = posMap[overlayOptions!.position] ?? "W-w-20:H-h-20";
+      filterParts.push(`[${overlayIdx}:v]scale=${scaledW}:-2,format=rgba,colorchannelmixer=aa=${alpha}[logo]`);
+      filterParts.push(`${videoOut}[logo]overlay=${pos}[vout]`);
+      videoOut = "[vout]";
+    }
+
+    let audioOut = "";
+    if (shouldKeepAudio) {
+      if (hasMusicTrack) {
+        const musicVol = (musicOptions!.musicVolume / 100).toFixed(2);
+        if (hasOriginalAudio) {
+          const origVol  = (musicOptions!.originalAudioVolume / 100).toFixed(2);
+          const origChain = afParts.length > 0
+            ? `[0:a]${afParts.join(",")},volume=${origVol}[orig]`
+            : `[0:a]volume=${origVol}[orig]`;
+          filterParts.push(origChain);
+          filterParts.push(`[${musicIdx}:a]volume=${musicVol}[music]`);
+          filterParts.push(`[orig][music]amix=inputs=2:duration=first:dropout_transition=0[aout]`);
+          audioOut = "[aout]";
+        } else {
+          filterParts.push(`[${musicIdx}:a]volume=${musicVol}[aout]`);
+          audioOut = "[aout]";
+        }
+      } else if (hasOriginalAudio && af) {
+        filterParts.push(`[0:a]${af}[aout]`);
+        audioOut = "[aout]";
+      }
+    }
+
+    if (filterParts.length > 0) {
+      args.push("-filter_complex", filterParts.join(";"));
+    }
+    args.push("-map", videoOut === "[0:v]" ? "0:v" : videoOut);
+
+    if (!shouldKeepAudio) {
+      args.push("-an");
+    } else if (audioOut) {
+      args.push("-map", audioOut);
+    } else if (hasOriginalAudio) {
+      args.push("-map", "0:a");
+    }
+  } else {
+    if (vf) args.push("-vf", vf);
+    if (!shouldKeepAudio) {
+      args.push("-an");
+    } else if (af && hasOriginalAudio) {
+      args.push("-af", af);
+    }
+  }
+
+  if (format === "webm") {
+    args.push("-c:v", "libvpx-vp9", "-b:v", "0", "-crf", String(recipe.quality));
+    if (shouldKeepAudio) args.push("-c:a", "libopus");
+  } else if (format === "mkv") {
+    args.push("-c:v", "libx264", "-crf", String(recipe.quality), "-preset", "medium");
+    if (shouldKeepAudio) args.push("-c:a", "aac", "-b:a", "128k");
+  } else {
+    args.push("-c:v", "libx264", "-crf", String(recipe.quality), "-preset", "medium", "-movflags", "+faststart");
+    if (shouldKeepAudio) args.push("-c:a", "aac", "-b:a", "128k");
+  }
+
+  args.push(outputName);
+  return args;
+}
+
 export async function exportVideo(
-  ffmpeg: FFmpeg,
+  ffmpeg: import("@ffmpeg/ffmpeg").FFmpeg,
   file: File,
   recipe: EditRecipe,
   onProgress: (percent: number) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  musicOptions?: BackgroundMusicOptions,
+  overlayOptions?: ImageOverlayOptions
 ): Promise<ExportResult> {
   const sessionId = buildSessionId();
   let targetW: number, targetH: number;
@@ -218,7 +336,7 @@ export async function exportVideo(
         return { filename: `output_${sessionId}.webm`, mimeType: "video/webm" };
       case "mkv":
         return { filename: `output_${sessionId}.mkv`, mimeType: "video/x-matroska" };
-      default: // mp4
+      default:
         return { filename: `output_${sessionId}.mp4`, mimeType: "video/mp4" };
     }
   };
@@ -234,63 +352,71 @@ export async function exportVideo(
   try {
     await ffmpeg.writeFile(inputName, await fetchFile(file), { signal });
 
+    const hasMusicTrack = !!(musicOptions?.file && recipe.keepAudio);
+    const musicInputName = `music_input_${sessionId}.mp3`;
+    if (hasMusicTrack) {
+      await ffmpeg.writeFile(musicInputName, await fetchFile(musicOptions!.file!), { signal });
+      cleanupFiles.add(musicInputName);
+    }
+
+    const hasOverlay = !!(overlayOptions?.file);
+    const overlayExt = overlayOptions?.file?.name.split(".").pop() ?? "png";
+    const overlayInputName = `overlay_${sessionId}.${overlayExt}`;
+    if (hasOverlay) {
+      await ffmpeg.writeFile(overlayInputName, await fetchFile(overlayOptions!.file!), { signal });
+      cleanupFiles.add(overlayInputName);
+    }
+
     ffmpeg.on("progress", handleProgress);
 
-    const vf = buildVideoFilter(recipe, targetW, targetH);
-    const audioTrim = buildAudioTrimFilter(recipe);
-    const audioSpeed = buildAudioFilter(recipe);
-    const afParts = [audioTrim, audioSpeed].filter(Boolean);
-    const af = afParts.join(",");
-
-    const args = ["-i", inputName];
-    if (vf) args.push("-vf", vf);
-
-    if (!recipe.keepAudio) {
-      args.push("-an");
-    } else if (af) {
-      args.push("-af", af);
-    }
-
-    if (recipe.format === "webm") {
-      args.push(
-        "-c:v", "libvpx-vp9",
-        "-b:v", "0",
-        "-crf", String(recipe.quality)
-      );
-      if (recipe.keepAudio) {
-        args.push("-c:a", "libopus");
+    let missingAudioDetected = false;
+    const logListener = ({ message }: { message: string }) => {
+      const msg = message.toLowerCase();
+      if (
+        msg.includes("matches no streams") ||
+        msg.includes("specifier '0:a'") ||
+        msg.includes("input pad 0 on filter src")
+      ) {
+        missingAudioDetected = true;
       }
-    } else if (recipe.format === "mkv") {
-      args.push("-c:v", "libx264", "-crf", String(recipe.quality), "-preset", "medium");
-      if (recipe.keepAudio) args.push("-c:a", "aac", "-b:a", "128k");
-    } else {
-      args.push("-c:v", "libx264", "-crf", String(recipe.quality), "-preset", "medium", "-movflags", "+faststart");
-      if (recipe.keepAudio) args.push("-c:a", "aac", "-b:a", "128k");
+    };
+    ffmpeg.on("log", logListener);
+
+    // Attempt 1: Process with standard audio streams
+    let args = buildArguments(
+      recipe, recipe.format, outputName, inputName, targetW, targetH,
+      hasMusicTrack, musicInputName, musicOptions,
+      hasOverlay, overlayInputName, overlayOptions, true
+    );
+
+    let exitCode = await ffmpeg.exec(args, undefined, { signal });
+
+    // Attempt 2: Auto-recover if the file has no original audio track
+    if (exitCode !== 0 && missingAudioDetected) {
+      missingAudioDetected = false;
+      args = buildArguments(
+        recipe, recipe.format, outputName, inputName, targetW, targetH,
+        hasMusicTrack, musicInputName, musicOptions,
+        hasOverlay, overlayInputName, overlayOptions, false
+      );
+      exitCode = await ffmpeg.exec(args, undefined, { signal });
     }
 
-    args.push(outputName);
-
-    const exitCode = await ffmpeg.exec(args, undefined, { signal });
-
+    // Fallback Attempt 3: Switch codecs to WebM if container errors happen
     if (exitCode !== 0) {
-      const fallbackArgs = [
-        "-i", inputName,
-        ...(vf ? ["-vf", vf] : []),
-        ...(recipe.keepAudio ? (af ? ["-af", af] : []) : ["-an"]),
-        "-c:v", "libvpx-vp9",
-        "-b:v", "0",
-        "-crf", String(recipe.quality),
-        ...(recipe.keepAudio ? ["-c:a", "libopus"] : []),
-        fallbackOutputName,
-      ];
+      args = buildArguments(
+        recipe, "webm", fallbackOutputName, inputName, targetW, targetH,
+        hasMusicTrack, musicInputName, musicOptions,
+        hasOverlay, overlayInputName, overlayOptions, !missingAudioDetected
+      );
 
-      const fallbackCode = await ffmpeg.exec(fallbackArgs, undefined, { signal });
-
+      const fallbackCode = await ffmpeg.exec(args, undefined, { signal });
       if (fallbackCode !== 0) throw new Error("Export failed");
 
       const data = await ffmpeg.readFile(fallbackOutputName, undefined, { signal });
       const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: "video/webm" });
 
+      ffmpeg.off("log", logListener);
       onProgress(100);
       return {
         blobUrl: URL.createObjectURL(blob),
@@ -304,6 +430,7 @@ export async function exportVideo(
     const data = await ffmpeg.readFile(outputName, undefined, { signal });
     const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: mimeType });
 
+    ffmpeg.off("log", logListener);
     onProgress(100);
     return {
       blobUrl: URL.createObjectURL(blob),
@@ -322,7 +449,6 @@ export async function exportVideo(
   }
 }
 
-/** Formats a byte count as a human-readable string (KB or MB). */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
