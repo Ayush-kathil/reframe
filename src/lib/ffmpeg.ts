@@ -90,6 +90,11 @@ function buildVideoFilter(recipe: EditRecipe, targetW: number, targetH: number):
     filters.push("setpts=PTS-STARTPTS");
   }
 
+ 
+  if (recipe.stabilization) {
+    filters.push("deshake");
+  }
+
   if (recipe.rotate === 90) {
     filters.push("transpose=1");
   } else if (recipe.rotate === 180) {
