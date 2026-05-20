@@ -7,6 +7,7 @@ export interface EditRecipe {
   trimEnd: number | null;
   rotate: number;
   keepAudio: boolean;
+  normalizeAudio: boolean;
   speed: number;
   quality: number;
   format: "mp4" | "webm" | "mkv" | "gif";
@@ -87,6 +88,7 @@ export const DEFAULT_RECIPE: EditRecipe = {
   trimEnd: null,
   rotate: 0,
   keepAudio: true,
+  normalizeAudio: false,
   speed: 1,
   quality: 23,
   format: "mp4",

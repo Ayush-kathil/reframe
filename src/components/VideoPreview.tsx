@@ -146,6 +146,12 @@ export default function VideoPreview({ file, recipe, videoRef }: Props) {
     };
   }, [file, videoRef]);
 
+  // sync mute state to video element
+  useEffect(() => {
+    if (!videoRef.current || !recipe) return;
+    videoRef.current.muted = !recipe.keepAudio;
+  }, [recipe, videoRef]);
+
   /**
    * Compute the overlay geometry for the selected preset + framing mode.
    * The preview container always uses a 16:9 aspect-video box.

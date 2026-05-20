@@ -180,6 +180,11 @@ export function buildAudioFilter(recipe: EditRecipe): string {
     filters.push(`volume=${recipe.volume}`);
   }
 
+  if (recipe.normalizeAudio) {
+    filters.push("loudnorm=I=-14:TP=-1.5:LRA=11");
+  }
+
+
   return filters.join(",");
 }
 
@@ -357,9 +362,16 @@ export async function exportVideo(
     onProgress(Math.min(99, Math.round(progress * 100)));
   };
 
+  
   try {
     await ffmpeg.writeFile(inputName, await fetchFile(file), { signal });
 
+    const vf = buildVideoFilter(recipe, targetW, targetH);
+  const audioTrim = buildAudioTrimFilter(recipe);
+  const audioSpeed = buildAudioFilter(recipe.speed, recipe.normalizeAudio ?? false);
+
+  const afParts = [audioTrim, audioSpeed].filter(Boolean);
+  const af = afParts.join(",");
     const hasMusicTrack = !!(musicOptions?.file && recipe.keepAudio);
     const musicInputName = `music_input_${sessionId}.mp3`;
     if (hasMusicTrack) {

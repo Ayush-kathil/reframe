@@ -34,4 +34,5 @@ export const DEFAULT_RECIPE: EditRecipe = {
   flipH: false,
   flipV: false,
   volume: 1,
+  normalizeAudio: false,
 };
