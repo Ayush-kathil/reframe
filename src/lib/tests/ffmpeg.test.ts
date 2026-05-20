@@ -41,4 +41,9 @@ describe("buildAudioFilter", () => {
     // 2.5 / 2.0 = 1.25
     expect(buildAudioFilter({ ...DEFAULT_RECIPE, speed: 10 })).toBe("atempo=2.0,atempo=2.0,atempo=2.0,atempo=1.25");
   });
+
+  it("should append loudnorm filter when normalizeAudio is true", () => {
+    const result = buildAudioFilter({ ...DEFAULT_RECIPE, normalizeAudio: true });
+    expect(result).toContain("loudnorm");
+  });
 });
