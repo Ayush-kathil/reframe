@@ -368,7 +368,7 @@ export async function exportVideo(
 
     const vf = buildVideoFilter(recipe, targetW, targetH);
   const audioTrim = buildAudioTrimFilter(recipe);
-  const audioSpeed = buildAudioFilter(recipe.speed, recipe.normalizeAudio ?? false);
+  const audioSpeed = buildAudioFilter(recipe);
 
   const afParts = [audioTrim, audioSpeed].filter(Boolean);
   const af = afParts.join(",");
