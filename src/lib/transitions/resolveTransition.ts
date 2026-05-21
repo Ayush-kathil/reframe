@@ -12,8 +12,8 @@ export function findAdjacentClipPairs(clips: TimelineClip[]) {
   const pairs: Array<{ left: TimelineClip; right: TimelineClip; junctionTime: number }> = [];
 
   for (let index = 0; index < sorted.length - 1; index += 1) {
-    const left = sorted[index];
-    const right = sorted[index + 1];
+    const left = sorted[index]!;
+    const right = sorted[index + 1]!;
     const junctionTime = left.startTime + left.duration;
     if (Math.abs(right.startTime - junctionTime) < 0.05) {
       pairs.push({ left, right, junctionTime });

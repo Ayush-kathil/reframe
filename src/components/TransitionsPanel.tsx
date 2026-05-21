@@ -67,7 +67,7 @@ export default function TransitionsPanel({ recipe, onChange, onDragStart }: Prop
   const transitionDuration = recipe.transitionDuration || 1.0;
   const transitionPlacement = recipe.transitionPlacement || "both";
 
-  const selected = TRANSITIONS.find((t) => t.id === selectedId) || TRANSITIONS[0];
+  const selected = TRANSITIONS.find((t) => t.id === selectedId) || TRANSITIONS[0]!;
 
   const handleSelectTransition = useCallback((transId: string) => {
     onChange({ 

@@ -11,18 +11,18 @@ export function sampleKeyframeTrack(nodes: KeyframeNode[] | undefined, time: num
 
   const sorted = [...nodes].sort((left, right) => left.time - right.time);
 
-  if (time <= sorted[0].time) {
-    return sorted[0].value;
+  if (time <= sorted[0]!.time) {
+    return sorted[0]!.value;
   }
 
-  const last = sorted[sorted.length - 1];
+  const last = sorted[sorted.length - 1]!;
   if (time >= last.time) {
     return last.value;
   }
 
   for (let index = 0; index < sorted.length - 1; index += 1) {
-    const current = sorted[index];
-    const next = sorted[index + 1];
+    const current = sorted[index]!;
+    const next = sorted[index + 1]!;
     if (time >= current.time && time <= next.time) {
       const span = next.time - current.time;
       if (span <= 0) {

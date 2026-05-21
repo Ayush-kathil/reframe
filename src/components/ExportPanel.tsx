@@ -73,10 +73,10 @@ export default function ExportPanel({
               <FormatSelector recipe={recipe} onChange={onChange} />
             </div>
 
-            {/* CRF Quality */}
+            {/* Export quality */}
             <div className="space-y-2">
               <span className="text-xs font-mono text-muted uppercase tracking-wider">Export quality</span>
-              <ExportSettings recipe={recipe} onChange={onChange} />
+              <ExportSettings recipe={recipe} duration={10} onChange={onChange} />
             </div>
           </div>
 

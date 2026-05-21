@@ -82,41 +82,7 @@ export const SPEED_STEPS = [
   4,
 ] as const;
 
-export const DEFAULT_RECIPE: EditRecipe = {
-  version: RECIPE_VERSION,
-  preset: "vertical-9-16",
-  customWidth: 1920,
-  customHeight: 1080,
-  framing: "fit",
-  trimStart: 0,
-  trimEnd: null,
-  rotate: 0,
-  keepAudio: true,
-  normalizeAudio: false,
-  speed: 1,
-  quality: 23,
-  format: "mp4",
-  stabilization: false,
-  brightness: 0,
-  contrast: 0,
-  saturation: 0,
-  soundOnCompletion: false,
-  hueRotate: 0,
-  sepia: 0,
-  grayscale: 0,
-  blur: 0,
-  opacity: 1,
-  invert: false,
-  sharpen: 0,
-  noise: 0,
-  vignette: 0,
-  colorBalanceR: 0,
-  colorBalanceG: 0,
-  colorBalanceB: 0,
-  flipH: false,
-  flipV: false,
-  volume: 1,
-};
+
 
 export const MAX_FILE_SIZE =
   2 * 1024 * 1024 * 1024;

@@ -41,9 +41,9 @@ function measureFocusCenter(source: CanvasImageSource, width: number, height: nu
       for (let y = row * cellHeight; y < (row + 1) * cellHeight; y += 2) {
         for (let x = col * cellWidth; x < (col + 1) * cellWidth; x += 2) {
           const index = (y * sampleWidth + x) * 4;
-          const red = image.data[index];
-          const green = image.data[index + 1];
-          const blue = image.data[index + 2];
+          const red = image.data[index] ?? 0;
+          const green = image.data[index + 1] ?? 0;
+          const blue = image.data[index + 2] ?? 0;
           const luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
           luminance += luma;
           contrast += Math.abs(red - green) + Math.abs(green - blue);
@@ -72,18 +72,18 @@ export function interpolateTracking(samples: TrackingSample[], time: number) {
     return { centerX: 0.5, centerY: 0.5 };
   }
 
-  if (time <= samples[0].time) {
-    return { centerX: samples[0].centerX, centerY: samples[0].centerY };
+  if (time <= samples[0]!.time) {
+    return { centerX: samples[0]!.centerX, centerY: samples[0]!.centerY };
   }
 
-  const last = samples[samples.length - 1];
+  const last = samples[samples.length - 1]!;
   if (time >= last.time) {
     return { centerX: last.centerX, centerY: last.centerY };
   }
 
   for (let index = 0; index < samples.length - 1; index += 1) {
-    const current = samples[index];
-    const next = samples[index + 1];
+    const current = samples[index]!;
+    const next = samples[index + 1]!;
     if (time >= current.time && time <= next.time) {
       const span = next.time - current.time;
       const amount = span <= 0 ? 0 : (time - current.time) / span;

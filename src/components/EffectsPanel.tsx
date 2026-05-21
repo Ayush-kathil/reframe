@@ -126,7 +126,7 @@ export default function EffectsPanel({ recipe, onChange }: Props) {
         </h3>
         <button
           type="button"
-          onClick={() => applyPreset(FILTER_PRESETS[0])}
+          onClick={() => applyPreset(FILTER_PRESETS[0]!)}
           className="text-[10px] text-primary hover:text-primary/80 uppercase tracking-wider font-semibold cursor-pointer bg-transparent border-0 flex items-center gap-1"
         >
           <span className="material-symbols-outlined text-[12px]">restart_alt</span>

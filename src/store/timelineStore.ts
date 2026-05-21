@@ -293,7 +293,7 @@ function createSeedProject(sourceUrl: string, duration: number) {
   if (clipDuration > 2.4) {
     const half = clipDuration / 2;
     tracks[0] = {
-      ...tracks[0],
+      ...tracks[0]!,
       clips: [
         {
           ...clip,
@@ -316,15 +316,15 @@ function createSeedProject(sourceUrl: string, duration: number) {
     };
   } else {
     tracks[0] = {
-      ...tracks[0],
+      ...tracks[0]!,
       clips: [clip],
     };
   }
 
   return {
     tracks,
-    selectedTrackId: tracks[0].id,
-    selectedClipId: tracks[0].clips[0]?.id ?? clip.id,
+    selectedTrackId: tracks[0]!.id,
+    selectedClipId: tracks[0]!.clips[0]?.id ?? clip.id,
   };
 }
 
@@ -580,7 +580,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
         const { clip, sorted } = clipBounds;
         const clipIndex = sorted.findIndex((entry) => entry.id === clipId);
         const previousClip = clipIndex > 0 ? sorted[clipIndex - 1] : null;
-        const targetClip = sorted[clipIndex];
+        const targetClip = sorted[clipIndex]!;
         const oldStart = clip.startTime;
         const oldEnd = clip.startTime + clip.duration;
 

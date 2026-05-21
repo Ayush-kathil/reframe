@@ -134,7 +134,7 @@ export default function StudioShell() {
       { sepia: 0.12, vignette: 0.18 },
     ];
 
-    updateRecipe(presets[index % presets.length]);
+    updateRecipe(presets[index % presets.length]!);
     setActiveTool("effects");
   }, [updateRecipe]);
 
@@ -251,7 +251,7 @@ export default function StudioShell() {
       case "audio":
         return <AudioMixer recipe={recipe} onChange={updateRecipe} duration={duration} />;
       case "export":
-        return <ExportSettings recipe={recipe} onChange={updateRecipe} />;
+        return <ExportSettings recipe={recipe} duration={duration} onChange={updateRecipe} />;
       case "properties":
       default:
         return (
@@ -423,7 +423,7 @@ export default function StudioShell() {
 
               <div className="-mt-2 flex justify-center">
                 <div className="flex items-center gap-2 rounded-2xl border border-black/5 bg-white px-3 py-2 shadow-sm">
-                  <button type="button" onClick={() => setActiveTool("properties")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-black/[0.03]"><SquarePlay className="h-4 w-4" />{canvasLabel.label} ({canvasLabel.width}×{canvasLabel.height})<ChevronDown className="h-4 w-4 text-[var(--muted)]" /></button>
+                  <button type="button" onClick={() => setActiveTool("properties")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-black/[0.03]"><SquarePlay className="h-4 w-4" />{canvasLabel?.label ?? "Custom"} ({canvasLabel?.width ?? recipe.customWidth}×{canvasLabel?.height ?? recipe.customHeight})<ChevronDown className="h-4 w-4 text-[var(--muted)]" /></button>
                   <span className="h-6 w-px bg-black/5" />
                   <button type="button" className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-black/[0.03]"><Circle className="mr-2 inline h-4 w-4 fill-black" />Background</button>
                   <button type="button" className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-black/[0.03]" onClick={() => setActiveTool("export")}><Settings2 className="mr-2 inline h-4 w-4" />Settings</button>
