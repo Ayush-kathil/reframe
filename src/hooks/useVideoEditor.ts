@@ -261,8 +261,7 @@ export function useVideoEditor() {
         file,
         recipe,
         setProgress,
-        abortController.signal,
-        duration
+        abortController.signal
       );
       if (exportCancelledRef.current) return;
 

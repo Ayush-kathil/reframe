@@ -34,6 +34,30 @@ export interface EditRecipe {
   flipH: boolean;
   flipV: boolean;
   volume: number;
+  panX: number;
+  panY: number;
+  watermarkEnabled: boolean;
+  watermarkText: string;
+  watermarkPosition: string;
+  watermarkSize: number;
+  watermarkOpacity: number;
+  watermarkColor: string;
+  watermarkFont: string;
+  captionEnabled: boolean;
+  captionText: string;
+  captionFont: string;
+  captionSize: number;
+  captionColor: string;
+  captionStyle: string;
+  captionPosition: string;
+  captionStartTime: number;
+  captionEndTime: number | null;
+  transitionId: string;
+  transitionDuration: number;
+  transitionPlacement: string;
+  audioFadeIn: number;
+  audioFadeOut: number;
+  audioEqualizer: string;
 }
 
 export type OverlayPosition =
@@ -82,8 +106,6 @@ export const SPEED_STEPS = [
   4,
 ] as const;
 
-
-
 export const MAX_FILE_SIZE =
   2 * 1024 * 1024 * 1024;
 
@@ -113,7 +135,6 @@ export function isValidRecipe(value: unknown): value is EditRecipe {
   if (typeof v.saturation !== "number" || !isFinite(v.saturation)) return false;
   if (typeof v.soundOnCompletion !== "boolean") return false;
   
-  // Advanced filters validation
   if (typeof v.hueRotate !== "number" || !isFinite(v.hueRotate)) return false;
   if (typeof v.sepia !== "number" || !isFinite(v.sepia)) return false;
   if (typeof v.grayscale !== "number" || !isFinite(v.grayscale)) return false;

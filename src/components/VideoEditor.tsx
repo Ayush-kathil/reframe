@@ -733,7 +733,7 @@ export default function VideoEditor() {
                 <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/85">Live Preview</span>
               </div>
               {file ? (
-                <VideoPreview file={file} recipe={recipe} videoRef={videoRef} currentTime={currentTime} duration={duration} />
+                <VideoPreview file={file} recipe={recipe} videoRef={videoRef} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center p-6 relative z-10">
                   <div className="w-full max-w-md p-6 bg-surface-container-low rounded-2xl border border-outline-variant/15 shadow-2xl">

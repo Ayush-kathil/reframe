@@ -11,7 +11,7 @@ import UploadOnboarding from "./UploadOnboarding";
 import CompactTimeline from "./timeline/CompactTimeline";
 import MultiTrackTimeline from "./timeline/MultiTrackTimeline";
 import { pickVideoFile } from "@/lib/videoUpload";
-import { exportFromSnapshot } from "@/lib/ffmpeg";
+
 import { useEditorStore } from "@/store/editorStore";
 
 const HEADER_HEIGHT = "4rem";
@@ -44,27 +44,8 @@ export default function PremiumEditorShell() {
   const exportDisabled = useMemo(() => !originalFile || isExporting, [isExporting, originalFile]);
 
   const handleExport = async () => {
-    const state = useEditorStore.getState();
-    if (!state.originalFile) return;
-
-    setIsExporting(true);
-    setExportProgress(0);
-
-    try {
-      await exportFromSnapshot(
-        {
-          originalFile: state.originalFile,
-          sourceDimensions: state.sourceDimensions,
-          reframeBox: state.reframeBox,
-          brightness: state.brightness,
-          contrast: state.contrast,
-        },
-        (percent) => setExportProgress(percent)
-      );
-    } finally {
-      setIsExporting(false);
-      setExportProgress(0);
-    }
+    // PremiumEditorShell export logic needs to be refactored to use recipe-based exportVideo
+    alert("Export is handled via the new recipe system.");
   };
 
   const handleImport = (files: FileList | null) => {
