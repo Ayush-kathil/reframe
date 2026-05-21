@@ -95,10 +95,10 @@ export default function AudioMixer({ recipe, onChange, onNext, onDragStart, dura
       {/* Audio Track Toggle */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             Audio Track
-          </label>
+          </div>
           <button
             type="button"
             onClick={() => onChange({ keepAudio: !recipe.keepAudio })}
@@ -152,10 +152,10 @@ export default function AudioMixer({ recipe, onChange, onNext, onDragStart, dura
 
           {/* Equalizer Presets */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-2">
               <AudioLines className="w-4 h-4" />
               Audio Equalizer
-            </label>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {EQ_PRESETS.map((preset) => (
                 <button

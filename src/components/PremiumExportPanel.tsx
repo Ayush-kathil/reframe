@@ -56,7 +56,7 @@ export default function ExportPanel({
                   <div className="space-y-4">
                     {/* Format Selector */}
                     <div className="space-y-3">
-                      <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Output Format</label>
+                      <div className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Output Format</div>
                       <FormatSelector recipe={recipe} onChange={onChange} />
                     </div>
 

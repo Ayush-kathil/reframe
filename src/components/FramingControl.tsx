@@ -60,10 +60,10 @@ export default function FramingControl({ recipe, onChange, onNext }: Props) {
         <div className="space-y-4 pt-4 border-t border-outline-variant/20 mt-2 animate-fade-in">
           {/* Full-frame reframing presets */}
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+            <div className="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
               <Focus className="w-4 h-4" />
               Focus Presets
-            </label>
+            </div>
             <div className="grid grid-cols-4 gap-2">
               {REFRAME_PRESETS.map((preset) => (
                 <button
