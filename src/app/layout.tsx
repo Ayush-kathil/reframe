@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Syne, DM_Sans } from "next/font/google";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import ScrollToTop from "@/components/ScrollToTop";
 import BrandLogo from "@/components/BrandLogo";
 
 export const metadata: Metadata = {
-  title: "Reframe — Resize, trim, and export videos in your browser",
-  description: "Free, open-source video editor that runs entirely in your browser. No login, no uploads, no ads. Resize for any platform, trim, rotate, adjust speed, and export.",
+  title: "Reframe — browser video editor for social formats",
+  description: "Reframe is a client-side video editor for resizing, reframing, trimming, and exporting content for Instagram, Reels, Shorts, and more.",
    keywords: [
     "video editor",
     "browser video editor",
@@ -25,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Reframe",
     description:
-      "Free, open-source browser-based video editor. Resize, trim, rotate, and export videos directly in your browser.",
+      "Client-side browser video editor for reframing, trimming, and exporting social-ready videos.",
     type: "website",
   },
 
@@ -33,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Reframe",
     description:
-      "Free, open-source browser-based video editor. Resize, trim, rotate, and export videos directly in your browser.",
+      "Client-side browser video editor for reframing, trimming, and exporting social-ready videos.",
   },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
@@ -87,16 +85,7 @@ export default function RootLayout({
         </a>
         <ThemeProvider>
           <ErrorBoundary>
-            <header
-              role="banner"
-              className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-[var(--border)] bg-[var(--bg)]"
-            >
-              <div className="flex items-center gap-2">
-                <BrandLogo size={24} />
-                <h1 className="text-lg font-semibold">Reframe</h1>
-              </div>
-              <ThemeToggle />
-            </header>
+
             <main id="main-content" tabIndex={-1}>
               {children}
             </main>

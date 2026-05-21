@@ -1,180 +1,88 @@
 "use client";
 
 import { EditRecipe } from "@/lib/types";
-import { useState, useEffect } from "react";
-import { AlertCircle } from "lucide-react";
-import { formatDuration } from "@/lib/utils";
-import { useAudioWaveform } from "@/hooks/useAudioWaveform";
-import WaveformCanvas from "@/components/WaveformCanvas";
+import { useState } from "react";
 
 interface Props {
   recipe: EditRecipe;
   onChange: (patch: Partial<EditRecipe>) => void;
   duration: number;
-  file: File | null;
 }
 
-export default function TrimControl({ recipe, onChange, duration, file }: Props) {
+export default function TrimControl({ recipe, onChange, duration }: Props) {
   const [invalidStart, setStart] = useState(false);
   const [invalidEnd, setEnd] = useState(false);
-  const [startErrorMsg, setStartErrorMsg] = useState("");
-  const [endErrorMsg, setEndErrorMsg] = useState("");
-  const [startInput, setStartInput] = useState(recipe.trimStart.toString());
-
-  const { waveform, isLoading: waveformLoading } = useAudioWaveform(file);
-  const hasAudio = waveform.length > 0;
-
-  useEffect(() => {
-    setStartInput(recipe.trimStart.toString());
-  }, [recipe.trimStart]);
-
-  const clipLength = (recipe.trimEnd ?? duration) - recipe.trimStart;
+  const clipEnd = recipe.trimEnd ?? duration;
+  const clipDuration = duration > 0 ? Math.max(0, clipEnd - recipe.trimStart) : 0;
+  const outputDuration = recipe.speed > 0 ? clipDuration / recipe.speed : 0;
 
   const handleStart = (val: string) => {
-    setStartInput(val);
-
-    if (val === "") {
-      setStart(false);
-      setStartErrorMsg("");
-      return;
-    }
-
     const n = parseFloat(val);
-
-    if (isNaN(n)) {
+    if (isNaN(n) || n < 0) {
       setStart(true);
-      setStartErrorMsg("Enter a valid number.");
       return;
     }
-
-    if (n < 0) {
-      setStart(true);
-      setStartErrorMsg("Start time must be 0 or greater.");
-      return;
-    }
-
     if (duration > 0 && n >= duration) {
       setStart(true);
-      setStartErrorMsg(
-        `Start time must be less than duration (${duration.toFixed(1)}s).`,
-      );
       return;
     }
-
     if (recipe.trimEnd !== null && n >= recipe.trimEnd) {
       setStart(true);
-      setStartErrorMsg("Start time must be less than the end time.");
       return;
-    }
-
+    };
     setStart(false);
-    setStartErrorMsg("");
-
     onChange({ trimStart: n });
   };
 
   const handleEnd = (val: string) => {
     if (val === "") {
-      onChange({ trimEnd: null });
       setEnd(false);
+      onChange({ trimEnd: null });
       return;
     }
-
     const n = parseFloat(val);
-
-    onChange({ trimEnd: n });
-
-    if (isNaN(n)) {
+    if (isNaN(n) || n <= 0 || n <= recipe.trimStart) {
       setEnd(true);
-      setEndErrorMsg("Enter a valid number.");
       return;
     }
-
-    if (n <= 0) {
+    if (duration > 0 && n > duration) {
       setEnd(true);
-      setEndErrorMsg("End time must be greater than 0.");
       return;
     }
-
-    if (n <= recipe.trimStart) {
-      setEnd(true);
-      setEndErrorMsg("End time must be greater than start time.");
-      return;
-    }
-
-    if (duration > 0 && n > duration + 0.01) {
-      setEnd(true);
-      setEndErrorMsg(
-        `End time cannot exceed duration (${duration.toFixed(1)}s).`,
-      );
-      return;
-    }
-
     setEnd(false);
-    setEndErrorMsg("");
+    onChange({ trimEnd: n });
   };
 
   const inputClass =
-    "w-full text-sm px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-film-400 text-[var(--text)] transition-shadow [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+    "w-full text-sm px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--bg)] font-heading focus:outline-none focus:ring-2 focus:ring-film-400 text-[var(--text)] transition-shadow";
 
   return (
-    <div id="trim-control" className="space-y-3">
-      {/* Waveform — shown while loading or when file is present */}
-      {(file && (waveformLoading || hasAudio)) && (
-        <div className="relative w-full rounded-md overflow-hidden bg-[var(--surface)]">
-          <WaveformCanvas
-            samples={waveform}
-            loading={waveformLoading}
-            hasAudio={hasAudio}
-          />
-        </div>
-      )}
-
+    <div className="space-y-2">
       <div className="flex gap-3">
         <div className="flex-1">
-          <label
-            htmlFor="trim-start"
-            className="font-heading mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]"
-          >
+          <label htmlFor="trim-start" className="text-sm font-heading font-semibold uppercase tracking-wider text-[var(--muted)] block mb-2">
             Start (sec)
           </label>
-
           <input
             id="trim-start"
             type="number"
             min={0}
             max={duration > 0 ? duration : undefined}
             step={0.1}
-            value={startInput}
+            value={recipe.trimStart}
             spellCheck={false}
             onChange={(e) => handleStart(e.target.value)}
             aria-label="Trim start time in seconds"
             aria-invalid={invalidStart}
-            aria-describedby={invalidStart ? "trim-start-error" : undefined}
             className={`${inputClass} ${
-              invalidStart ? "border-red-500" : "border-[var(--border)]"
-            }`}
+              invalidStart ? "border-red-500" : "border-[var(--border)]"}`}
             placeholder="0"
           />
-          {invalidStart && (
-            <p
-              id="trim-start-error"
-              className="font-heading animate-fade-in mt-1.5 flex items-center gap-1 text-[10px] text-red-500"
-            >
-              <AlertCircle size={10} className="shrink-0" />
-              {startErrorMsg}
-            </p>
-          )}
         </div>
-
         <div className="flex-1">
-          <label
-            htmlFor="trim-end"
-            className="font-heading mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]"
-          >
+          <label htmlFor="trim-end" className="text-sm font-heading font-semibold uppercase tracking-wider text-[var(--muted)] block mb-2">
             End (sec)
           </label>
-
           <input
             id="trim-end"
             type="number"
@@ -186,27 +94,21 @@ export default function TrimControl({ recipe, onChange, duration, file }: Props)
             onChange={(e) => handleEnd(e.target.value)}
             aria-label="Trim end time in seconds"
             aria-invalid={invalidEnd}
-            className={`${inputClass} ${invalidEnd ? "border-red-500" : "border-[var(--border)]"}`}
-            placeholder={
-              duration > 0 ? `${duration.toFixed(1)}` : "full length"
-            }
+            className={`${inputClass} ${
+              invalidEnd ? "border-red-500" : "border-[var(--border)]"}`}
+            placeholder={duration > 0 ? `${duration.toFixed(1)}` : "full length"}
           />
-          {invalidEnd && (
-            <p
-              id="trim-end-error"
-              className="font-heading animate-fade-in mt-1.5 flex items-center gap-1 text-[10px] text-red-500"
-            >
-              <AlertCircle size={10} className="shrink-0" />
-              {endErrorMsg}
-            </p>
-          )}
         </div>
       </div>
-
       {duration > 0 && (
-        <p className="text-sm text-[var(--muted)] font-heading mt-1">
-          Clip: {formatDuration(clipLength)} of {formatDuration(duration)}
-        </p>
+        <div className="space-y-1 text-sm text-[var(--muted)] font-heading mt-1">
+          <p>
+            Source: {duration.toFixed(1)}s
+          </p>
+          <p>
+            Output after trim/speed: {outputDuration.toFixed(1)}s ({recipe.speed}x)
+          </p>
+        </div>
       )}
     </div>
   );

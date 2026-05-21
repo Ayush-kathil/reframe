@@ -1,12 +1,11 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: "class", // Enable class-based dark mode
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    // Added files to catch utility strings hidden in hooks, providers, or custom UI state contexts
     "./src/hooks/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/context/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
@@ -14,8 +13,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "#0A0A0B",
+        foreground: "#f4f4f5",
         film: {
           50: "var(--film-50)",
           100: "var(--film-100)",
@@ -29,6 +28,61 @@ const config: Config = {
           900: "var(--film-900)",
           950: "var(--film-950)",
         },
+        bg: "var(--bg)",
+        border: "var(--border)",
+        text: "var(--text)",
+        muted: "var(--muted)",
+        accent: {
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
+        },
+        surface: "#141416",
+        "surface-container": "#18181b",
+        "surface-container-high": "#27272a",
+        "surface-container-highest": "#3f3f46",
+        primary: "#8b5cf6",
+        secondary: "#a855f7",
+        tertiary: "#ec4899",
+      },
+      borderRadius: {
+        sm: "0.125rem",
+        DEFAULT: "0.25rem",
+        md: "0.375rem",
+        lg: "0.5rem",
+        xl: "0.75rem",
+        "2xl": "1rem",
+        full: "9999px",
+      },
+      spacing: {
+        "toolbar-padding": "8px",
+        "item-gap": "4px",
+        "panel-gap": "2px",
+        unit: "4px",
+        "container-margin": "12px",
+        xs: "4px",
+        sm: "8px",
+        md: "12px",
+        lg: "16px",
+        xl: "24px",
+        gutter: "20px",
+        "margin-desktop": "32px",
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+      fontSize: {
+        "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "body-sm": ["11px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "400" }],
+        "label-caps": ["10px", { lineHeight: "12px", letterSpacing: "0.05em", fontWeight: "700" }],
+        "body-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+        "label-mono": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+        "body-lg": ["15px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }],
+        "title-md": ["16px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "600" }],
+        "title-lg": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "800" }],
       },
       keyframes: {
         shimmer: {

@@ -1,41 +1,54 @@
 "use client";
 
 import { EditRecipe } from "@/lib/types";
-import { RotateCw } from "lucide-react";
+import { RotateCw, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   recipe: EditRecipe;
   onChange: (patch: Partial<EditRecipe>) => void;
+  onNext?: () => void;
 }
 
 const ROTATIONS = [0, 90, 180, 270] as const;
 
-export default function RotateControl({ recipe, onChange }: Props) {
+export default function RotateControl({ recipe, onChange, onNext }: Props) {
   return (
-    <div className="flex gap-2">
-      {ROTATIONS.map((deg) => {
-        const active = recipe.rotate === deg;
-        return (
-          <button
-            type="button"
-            key={deg}
-            onClick={() => onChange({ rotate: deg })}
-            aria-label={`Rotate video to ${deg} degrees`}
-            aria-pressed={active}
-            className={cn(
-              "flex-1 min-h-[44px] min-w-[44px] flex flex-col items-center justify-center gap-1.5 py-3 rounded-lg border text-xs transition-all duration-150 cursor-pointer hover:scale-[1.03] active:scale-[0.97]",
-              active
-                ? "border-film-500 bg-film-50 text-film-700 font-heading font-semibold"
-                : "border-[var(--border)] text-[var(--muted)] hover:border-film-300 bg-[var(--surface)]"
-            )}
-          >
-            <RotateCw size={15} style={{ transform: `rotate(${deg}deg)`, transformOrigin: 'center' }} className="transition-transform" />
-            <span className="sr-only">Rotate video to {deg} degrees</span>
-            {deg}
-          </button>
-        );
-      })}
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        {ROTATIONS.map((deg) => {
+          const active = recipe.rotate === deg;
+          return (
+            <button
+              type="button"
+              key={deg}
+              onClick={() => onChange({ rotate: deg })}
+              aria-label={`Rotate video to ${deg} degrees`}
+              aria-pressed={active}
+              className={cn(
+                "flex-1 min-h-[44px] min-w-[44px] flex flex-col items-center justify-center gap-1.5 py-3 rounded-lg border text-xs transition-all duration-150 cursor-pointer hover:scale-[1.03] active:scale-[0.97]",
+                active
+                  ? "border-film-500 bg-film-50 text-film-700 font-heading font-semibold"
+                  : "border-[var(--border)] text-[var(--muted)] hover:border-film-300 bg-[var(--surface)]"
+              )}
+            >
+              <RotateCw size={15} style={{ transform: `rotate(${deg}deg)`, transformOrigin: 'center' }} className="transition-transform" />
+              <span className="sr-only">Rotate video to {deg} degrees</span>
+              {deg}
+            </button>
+          );
+        })}
+      </div>
+      {onNext && (
+        <button
+          type="button"
+          onClick={onNext}
+          className="w-full py-2 px-3 rounded-lg bg-primary text-on-primary font-semibold uppercase tracking-wider text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all active:scale-95"
+        >
+          Next
+          <ArrowRight className="w-3 h-3" />
+        </button>
+      )}
     </div>
   );
 }

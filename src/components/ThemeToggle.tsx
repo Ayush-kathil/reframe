@@ -31,13 +31,10 @@ export function ThemeToggle() {
       className="
         relative flex items-center justify-center
         w-9 h-9 rounded-full
-        bg-gray-100 dark:bg-gray-800
-        text-gray-700 dark:text-gray-200
-        border border-gray-200 dark:border-gray-700
-        hover:bg-gray-200 dark:hover:bg-gray-700
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-        dark:focus:ring-offset-gray-900
-        transition-colors duration-200
+        bg-bg border border-border
+        text-muted hover:text-text hover:bg-surface
+        focus:outline-none focus:ring-1 focus:ring-accent
+        transition-all duration-200 cursor-pointer
       "
     >
       {/* Sun icon — shown in light mode */}
